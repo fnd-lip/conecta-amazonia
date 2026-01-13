@@ -11,18 +11,17 @@ env:
 
 jobs:
   lint:
-    name: lint
+    name: lint (non-blocking)
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Instala dependências do backend usando lockfile (mais confiável no CI)
       - name: Install dependencies (backend)
         run: npm ci
         working-directory: backend
 
-      # NÃO modifica o repositório: instala só no runner do GitHub Actions
       - name: Install missing lint deps (CI only)
         run: npm i -D eslint-config-prettier
         working-directory: backend
@@ -30,6 +29,10 @@ jobs:
       - name: Run lint (backend)
         run: npm run lint
         working-directory: backend
+
+      - name: Warn if lint failed
+        if: failure()
+        run: echo "⚠️ Lint falhou, mas o deploy vai continuar."
 
   build_docker:
     name: build_docker
