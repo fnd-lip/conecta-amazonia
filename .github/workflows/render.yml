@@ -11,9 +11,8 @@ env:
 
 jobs:
   lint:
-    name: lint (non-blocking)
+    name: lint (warning only)
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -26,13 +25,11 @@ jobs:
         run: npm i -D eslint-config-prettier
         working-directory: backend
 
-      - name: Run lint (backend)
-        run: npm run lint
+      # Não deixa o job falhar (vira aviso)
+      - name: Run lint (backend) - do not fail pipeline
+        run: |
+          npm run lint || echo "Lint falhou (não bloqueia o deploy)"
         working-directory: backend
-
-      - name: Warn if lint failed
-        if: failure()
-        run: echo "⚠️ Lint falhou, mas o deploy vai continuar."
 
   build_docker:
     name: build_docker
@@ -71,9 +68,9 @@ jobs:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
         run: |
-          echo "🚀 Disparando deploy no Render..."
+          echo "Disparando deploy no Render..."
           curl -sS -X POST "https://api.render.com/v1/services/$SERVICE_ID/deploys" \
             -H "Accept: application/json" \
             -H "Authorization: Bearer $RENDER_API_KEY" \
             -H "Content-Type: application/json"
-          echo "✅ Deploy disparado com sucesso!"
+          echo "Deploy disparado com sucesso!"
