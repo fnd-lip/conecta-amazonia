@@ -1,4 +1,4 @@
-name: CI/CD - Conecta Amazonia (Docker → Render)
+name: CI/CD - Conecta Amazonia
 
 on:
   push:
@@ -17,13 +17,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # ⚠️ Se o package.json do lint estiver em backend/,
-      # adicione: working-directory: backend
-      - name: Install dependencies
+      - name: Install dependencies (backend)
         run: npm install
+        working-directory: backend
 
-      - name: Run lint
+      - name: Run lint (backend)
         run: npm run lint
+        working-directory: backend
 
   build_docker:
     name: build_docker
@@ -42,14 +42,11 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image (backend)
         uses: docker/build-push-action@v5
         with:
-          # ⚠️ Se o Dockerfile estiver em backend/, troque para:
-          # context: ./backend
-          # dockerfile: ./backend/Dockerfile
-          context: .
-          dockerfile: ./Dockerfile
+          context: ./backend
+          dockerfile: ./backend/Dockerfile
           push: true
           tags: |
             ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
