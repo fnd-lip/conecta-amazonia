@@ -1,21 +1,19 @@
-name: CI/CD - Conecta Amazonia (Docker → Render)
+name: CI/CD - Conecta Amazonia
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 env:
   DOCKER_IMAGE: felipebarbosadelima/conecta-amazonia
   DOCKER_TAG: latest
 
 jobs:
-  lint:
-    name: lint (warning only)
+  lint_backend:
+    name: lint backend (warning only)
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Install dependencies (backend)
         run: npm ci
@@ -25,19 +23,16 @@ jobs:
         run: npm i -D eslint-config-prettier
         working-directory: backend
 
-      # Não deixa o job falhar (vira aviso)
       - name: Run lint (backend) - do not fail pipeline
-        run: |
-          npm run lint || echo "Lint falhou (não bloqueia o deploy)"
+        run: npm run lint || echo " Lint falhou (não bloqueia o deploy)"
         working-directory: backend
 
-  build_docker:
-    name: build_docker
-    needs: lint
+  build_docker_backend:
+    name: build docker backend
+    needs: lint_backend
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -58,19 +53,38 @@ jobs:
             ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
             ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
 
-  deploy_render:
-    name: deploy_render
-    needs: build_docker
+  deploy_backend_render:
+    name: deploy backend (Render)
+    needs: build_docker_backend
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger deploy on Render
+      - name: Trigger deploy on Render (backend)
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
         run: |
-          echo "Disparando deploy no Render..."
+          echo " Deploy BACKEND..."
           curl -sS -X POST "https://api.render.com/v1/services/$SERVICE_ID/deploys" \
             -H "Accept: application/json" \
             -H "Authorization: Bearer $RENDER_API_KEY" \
             -H "Content-Type: application/json"
-          echo "Deploy disparado com sucesso!"
+          echo " Backend disparado!"
+
+  # FRONTEND (deploy)
+
+  deploy_frontend_render:
+    name: deploy frontend (Render)
+    needs: deploy_backend_render
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deploy on Render (frontend)
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          SERVICE_ID: ${{ secrets.RENDER_FRONTEND_SERVICE_ID }}
+        run: |
+          echo " Deploy FRONTEND..."
+          curl -sS -X POST "https://api.render.com/v1/services/$SERVICE_ID/deploys" \
+            -H "Accept: application/json" \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            -H "Content-Type: application/json"
+          echo " Frontend disparado!"
