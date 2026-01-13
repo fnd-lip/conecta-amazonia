@@ -1,30 +1,36 @@
-name: CI/CD - Render
+name: CI/CD - Conecta Amazonia (Docker → Render)
 
 on:
   push:
     branches:
       - main
 
-jobs:
-  ci:
-    runs-on: ubuntu-latest
+env:
+  DOCKER_IMAGE: felipebarbosadelima/conecta-amazonia
+  DOCKER_TAG: latest
 
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v3
 
+      # ⚠️ Se o package.json do lint estiver em backend/,
+      # adicione: working-directory: backend
       - name: Install dependencies
         run: npm install
 
       - name: Run lint
         run: npm run lint
 
-  build:
-    needs: ci
+  build_docker:
+    name: build_docker
+    needs: lint
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
@@ -36,25 +42,32 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push image
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
+          # ⚠️ Se o Dockerfile estiver em backend/, troque para:
+          # context: ./backend
+          # dockerfile: ./backend/Dockerfile
           context: .
           dockerfile: ./Dockerfile
           push: true
-          tags: felipebarbosadelima/webacademy:latest
+          tags: |
+            ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
+            ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
 
-  deploy:
-    needs: build
+  deploy_render:
+    name: deploy_render
+    needs: build_docker
     runs-on: ubuntu-latest
-
     steps:
       - name: Trigger deploy on Render
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
         run: |
-          curl -X POST "https://api.render.com/v1/services/$SERVICE_ID/deploys" \
+          echo "🚀 Disparando deploy no Render"
+          curl -sS -X POST "https://api.render.com/v1/services/$SERVICE_ID/deploys" \
             -H "Accept: application/json" \
             -H "Authorization: Bearer $RENDER_API_KEY" \
             -H "Content-Type: application/json"
+          echo "✅ Deploy disparado com sucesso"
