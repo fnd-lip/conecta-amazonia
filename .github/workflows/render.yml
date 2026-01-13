@@ -1,4 +1,4 @@
-name: CI/CD - Conecta Amazonia
+name: CI/CD - Conecta Amazonia (Docker → Render)
 
 on:
   push:
@@ -17,8 +17,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Instala dependências do backend usando lockfile (mais confiável no CI)
       - name: Install dependencies (backend)
-        run: npm install
+        run: npm ci
+        working-directory: backend
+
+      # NÃO modifica o repositório: instala só no runner do GitHub Actions
+      - name: Install missing lint deps (CI only)
+        run: npm i -D eslint-config-prettier
         working-directory: backend
 
       - name: Run lint (backend)
@@ -62,9 +68,9 @@ jobs:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
         run: |
-          echo "🚀 Disparando deploy no Render"
+          echo "🚀 Disparando deploy no Render..."
           curl -sS -X POST "https://api.render.com/v1/services/$SERVICE_ID/deploys" \
             -H "Accept: application/json" \
             -H "Authorization: Bearer $RENDER_API_KEY" \
             -H "Content-Type: application/json"
-          echo "✅ Deploy disparado com sucesso"
+          echo "✅ Deploy disparado com sucesso!"
