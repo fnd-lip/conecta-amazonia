@@ -1,0 +1,15 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Conecta Amazônia",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "conecta_amazonia",
+      "Username": "user",
+      "Password": "pass",
+      "SSLMode": "prefer",
+      "Favourite": true
+    }
+  }
+}

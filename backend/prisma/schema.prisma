@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Event {
+  id        String   @id @default(uuid())
+  nome      String   @unique @db.VarChar(100)
+  descricao String
+  data      DateTime
+  categoria String
+  createdAt DateTime @default(now())
+  userId    String
+  logoUrl   String?  @db.VarChar(255)
+  externalLink String? @db.VarChar(255)
+  relatedLinks String[] @db.VarChar(255)
+
+  parentId String?
+  parent   Event?  @relation("EventHierarchy", fields: [parentId], references: [id])
+  children Event[] @relation("EventHierarchy")
+  user     User    @relation(fields: [userId], references: [id])
+}
+
+model UserType {
+  id        Int      @id
+  label     String   @db.VarChar(25)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User[]
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String   @db.VarChar(100)
+  email     String   @unique @db.VarChar(100)
+  password  String   @db.VarChar(70)
+  typeId    Int
+  type      UserType @relation(fields: [typeId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  events    Event[]
+}

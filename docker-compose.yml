@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: conecta-amazonia-db
+    environment:
+      POSTGRES_DB: conecta_amazonia
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_ROOT_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - conecta-amazonia-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d conecta_amazonia"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+  
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: conecta-amazonia-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin-servers.json:/pgadmin4/servers.json
+    depends_on:
+      - postgres
+    networks:
+      - conecta-amazonia-network
+  
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: conecta-amazonia-backend
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://user:pass@postgres:5432/conecta_amazonia
+      NODE_ENV: production
+      JWT_SECRET: 123456
+      PORT: 3001
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - conecta-amazonia-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: conecta-amazonia-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - conecta-amazonia-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  conecta-amazonia-network:
+    driver: bridge

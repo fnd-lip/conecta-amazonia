@@ -1,0 +1,93 @@
+.app-container {
+  width: 100%;
+  display: block;
+}
+
+.form-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+  padding: 20px;
+}
+
+.header {
+  width: 100%;
+  padding: 2px;
+  background: #0b3d2e;
+  color: white;
+  display: flex;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+/* CONTAINER DO FORMULÁRIO */
+.form-container {
+  width: 100%;
+  max-width: 450px;
+  margin: 20px;
+  padding: 25px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  color: #213547;
+}
+
+/* Título */
+.form-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #0b3d2e;
+}
+
+/* CARD DO FORM */
+.form-card {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Cada campo */
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Nome dos campos */
+.form-group label {
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+/* INPUTS, TEXTAREA E SELECT */
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 10px;
+  border: 1px solid #c7c7c7;
+  border-radius: 6px;
+  font-size: 15px;
+  background: #ffffff;
+  color: #000000;
+}
+
+/* Textarea não redimensionável */
+.form-group textarea {
+  resize: none;
+}
+
+/* Botão */
+.btn-submit {
+  padding: 12px;
+  background: #0b3d2e;
+  border: none;
+  color: white;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-submit:hover {
+  background: #0d4d38;
+}

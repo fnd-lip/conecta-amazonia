@@ -1,0 +1,118 @@
+/* ===============================
+   CARD ORIGINAL (já existente)
+   =============================== */
+
+.event-card {
+  width: 220px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-5px);
+}
+
+.event-circle {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: #0b3d2e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 12px;
+}
+
+.event-letter {
+  color: white;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.event-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #0b3d2e;
+}
+
+.event-description {
+  font-size: 14px;
+  color: #444;
+  margin-bottom: 8px;
+}
+
+.event-meta {
+  font-size: 13px;
+  color: #777;
+}
+
+/* =====================================================
+   NOVA VARIANTE – CARD PARA CARROSSEL (igual ao exemplo)
+   ===================================================== */
+
+.event-card-carousel {
+  width: 100%;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.event-card-carousel:hover {
+  transform: translateY(-4px);
+}
+
+.event-card-carousel__thumb {
+  width: 100%;
+  height: 160px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #e5e7eb;
+}
+
+.event-card-carousel__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* placeholder cinza como no exemplo */
+.event-card-carousel__thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #d1d5db;
+}
+
+.event-card-carousel__body {
+  padding-top: 10px;
+}
+
+.event-card-carousel__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.event-card-carousel__line {
+  font-size: 14px;
+  color: #64748b;
+  margin-top: 4px;
+  line-height: 1.5;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -1,0 +1,279 @@
+.admin-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 80px);
+}
+
+.admin-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.admin-header h1 {
+  color: #343a40;
+  margin-bottom: 10px;
+  font-size: 2.5rem;
+}
+
+.admin-header p {
+  color: #6c757d;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.tab-button {
+  padding: 12px 24px;
+  border: none;
+  background: transparent;
+  color: #6c757d;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+  color: #007bff;
+  background-color: #f8f9fa;
+}
+
+.tab-button.active {
+  color: #007bff;
+  border-bottom-color: #007bff;
+  background-color: #f8f9fa;
+}
+
+.loading-container, .error-container, .empty-state {
+  text-align: center;
+  padding: 40px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.error-container {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.error-container button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.events-tab h2, .users-tab h2 {
+  color: #343a40;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.table-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.admin-table thead {
+  background-color: #007bff;
+  color: white;
+}
+
+.admin-table th {
+  padding: 15px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e9ecef;
+  vertical-align: middle;
+}
+
+.admin-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Badges */
+.type-badge, .category-badge, .role-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.type-badge.principal {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.type-badge.subevento {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.category-badge {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+
+.role-badge.administrador {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.role-badge.gestor-local {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.subevent-count {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.no-subevent {
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Action buttons */
+.action-buttons {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.btn-view, .btn-edit, .btn-delete {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-view {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.btn-view:hover {
+  background-color: #138496;
+}
+
+.btn-edit {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.btn-edit:hover {
+  background-color: #e0a800;
+}
+
+.btn-delete {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-delete:hover {
+  background-color: #c82333;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .admin-container {
+    padding: 10px;
+  }
+  
+  .admin-header h1 {
+    font-size: 2rem;
+  }
+  
+  .admin-header p {
+    font-size: 1rem;
+  }
+  
+  .admin-tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .tab-button {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+  
+  .table-container {
+    margin: 0 -10px;
+    border-radius: 0;
+  }
+  
+  .admin-table th, .admin-table td {
+    padding: 8px 6px;
+    font-size: 0.8rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 3px;
+  }
+  
+  .btn-view, .btn-edit, .btn-delete {
+    width: 100%;
+    padding: 4px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .admin-table th, .admin-table td {
+    padding: 6px 4px;
+    font-size: 0.75rem;
+  }
+  
+  .type-badge, .category-badge, .role-badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+  }
+}

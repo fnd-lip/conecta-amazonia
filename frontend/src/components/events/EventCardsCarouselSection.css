@@ -1,0 +1,131 @@
+.carousel-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 40px auto 0;
+  padding: 0 16px;
+}
+
+.carousel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.carousel-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.2px;
+}
+
+.carousel-box {
+  position: relative;
+  border: 1px solid rgba(37, 99, 235, 0.55); /* azul mais suave */
+  border-radius: 16px;
+  padding: 22px 18px;
+  background: #ffffff;
+  box-shadow:
+    0 10px 30px rgba(2, 6, 23, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.6) inset;
+}
+
+.carousel-row {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  align-items: flex-start;
+
+  padding-right: 78px;
+  padding-bottom: 8px;
+
+  -webkit-overflow-scrolling: touch;
+
+  scrollbar-width: none;
+}
+
+.carousel-row::-webkit-scrollbar {
+  height: 0;
+}
+
+.carousel-msg {
+  padding: 18px 10px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.carousel-msg.error {
+  color: #dc2626;
+}
+
+/* seta */
+.carousel-arrow {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+
+  background: rgba(241, 245, 249, 0.88);
+  backdrop-filter: blur(6px);
+
+  color: #0f172a;
+  font-size: 22px;
+  font-weight: 800;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: 0 10px 18px rgba(2, 6, 23, 0.12);
+}
+
+.carousel-arrow:hover {
+  background: rgba(226, 232, 240, 0.95);
+  transform: translateY(-50%) scale(1.06);
+  box-shadow: 0 14px 22px rgba(2, 6, 23, 0.16);
+}
+
+.carousel-arrow:active {
+  transform: translateY(-50%) scale(0.98);
+}
+
+.carousel-spacer {
+  flex: 1 1 auto;
+  min-width: 1px;
+}
+
+@media (max-width: 640px) {
+  .carousel-section {
+    margin-top: 26px;
+    padding: 0 12px;
+  }
+
+  .carousel-title {
+    font-size: 18px;
+  }
+
+  .carousel-box {
+    border-radius: 14px;
+    padding: 16px 12px;
+  }
+
+  .carousel-row {
+    gap: 14px;
+    padding-right: 66px;
+  }
+
+  .carousel-arrow {
+    width: 40px;
+    height: 40px;
+    right: 10px;
+    font-size: 20px;
+  }
+}
