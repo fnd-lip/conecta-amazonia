@@ -4,12 +4,17 @@ export class AdminRepository {
   static async findAllEvents() {
     return await prisma.event.findMany({
       include: {
+        eventType: true,
         user: {
           select: {
             name: true
           }
         },
-        children: true
+        children: {
+          include: {
+            eventType: true
+          }
+        }
       },
       orderBy: {
         createdAt: 'desc'

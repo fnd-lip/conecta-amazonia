@@ -54,7 +54,9 @@
   background-color: #f8f9fa;
 }
 
-.loading-container, .error-container, .empty-state {
+.loading-container,
+.error-container,
+.empty-state {
   text-align: center;
   padding: 40px;
   background-color: #f8f9fa;
@@ -78,18 +80,10 @@
   cursor: pointer;
 }
 
-.events-tab h2, .users-tab h2 {
-  color: #343a40;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
 .table-container {
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   overflow-x: auto;
 }
@@ -128,58 +122,17 @@
   border-bottom: none;
 }
 
-/* Badges */
-.type-badge, .category-badge, .role-badge {
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.type-badge.principal {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.type-badge.subevento {
-  background-color: #d1ecf1;
-  color: #0c5460;
-}
-
-.category-badge {
-  background-color: #e2e3e5;
-  color: #383d41;
-}
-
-.role-badge.administrador {
-  background-color: #f8d7da;
-  color: #721c24;
-}
-
-.role-badge.gestor-local {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.subevent-count {
-  color: #28a745;
-  font-weight: 600;
-}
-
-.no-subevent {
-  color: #6c757d;
-  font-style: italic;
-}
-
-/* Action buttons */
 .action-buttons {
   display: flex;
   gap: 5px;
   flex-wrap: wrap;
 }
 
-.btn-view, .btn-edit, .btn-delete {
+.btn-view,
+.btn-edit,
+.btn-delete,
+.btn-save,
+.btn-cancel {
   padding: 6px 12px;
   border: none;
   border-radius: 4px;
@@ -217,46 +170,68 @@
   background-color: #c82333;
 }
 
-/* Responsive design */
+.btn-save {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn-save:hover {
+  background-color: #218838;
+}
+
+.btn-cancel {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-cancel:hover {
+  background-color: #5a6268;
+}
+
 @media (max-width: 768px) {
   .admin-container {
     padding: 10px;
   }
-  
+
   .admin-header h1 {
     font-size: 2rem;
   }
-  
+
   .admin-header p {
     font-size: 1rem;
   }
-  
+
   .admin-tabs {
     overflow-x: auto;
     white-space: nowrap;
   }
-  
+
   .tab-button {
     padding: 10px 20px;
     font-size: 0.9rem;
   }
-  
+
   .table-container {
     margin: 0 -10px;
     border-radius: 0;
   }
-  
-  .admin-table th, .admin-table td {
+
+  .admin-table th,
+  .admin-table td {
     padding: 8px 6px;
     font-size: 0.8rem;
   }
-  
+
   .action-buttons {
     flex-direction: column;
     gap: 3px;
   }
-  
-  .btn-view, .btn-edit, .btn-delete {
+
+  .btn-view,
+  .btn-edit,
+  .btn-delete,
+  .btn-save,
+  .btn-cancel {
     width: 100%;
     padding: 4px 8px;
   }
@@ -266,14 +241,10 @@
   .admin-header h1 {
     font-size: 1.8rem;
   }
-  
-  .admin-table th, .admin-table td {
+
+  .admin-table th,
+  .admin-table td {
     padding: 6px 4px;
     font-size: 0.75rem;
-  }
-  
-  .type-badge, .category-badge, .role-badge {
-    font-size: 0.7rem;
-    padding: 2px 6px;
   }
 }

@@ -3,9 +3,11 @@ import { EventService } from './event.service';
 import { CreateEventDTO } from './event.types';
 import logger from '../../config/logger';
 import { EventRepository } from './event.repository';
+import { EventTypeRepository } from '../event-type/event-type.repository';
 
 const eventRepository = new EventRepository();
-const eventService = new EventService(eventRepository);
+const eventTypeRepository = new EventTypeRepository();
+const eventService = new EventService(eventRepository, eventTypeRepository);
 
 class EventController {
   async create(req: Request, res: Response) {
@@ -29,7 +31,30 @@ class EventController {
             .filter((v: string) => v.length > 0);
         }
       }
-      const eventData = { ...req.body, userId, logoUrl, relatedLinks };
+      const latitude =
+        req.body.latitude !== undefined && req.body.latitude !== ''
+          ? parseFloat(req.body.latitude)
+          : undefined;
+      const longitude =
+        req.body.longitude !== undefined && req.body.longitude !== ''
+          ? parseFloat(req.body.longitude)
+          : undefined;
+
+      if (latitude !== undefined && Number.isNaN(latitude)) {
+        return res.status(400).json({ error: 'Latitude invalida.' });
+      }
+      if (longitude !== undefined && Number.isNaN(longitude)) {
+        return res.status(400).json({ error: 'Longitude invalida.' });
+      }
+
+      const eventData = {
+        ...req.body,
+        userId,
+        logoUrl,
+        relatedLinks,
+        latitude,
+        longitude,
+      };
 
       const event = await eventService.createEvent(eventData as CreateEventDTO);
       logger.info({ event }, 'Evento criado com sucesso');
@@ -106,15 +131,49 @@ class EventController {
       const userId = (req as any).user.id;
       const eventData = req.body;
 
+      let logoUrl: string | undefined = undefined;
+      if (req.file) {
+        logoUrl = `/uploads/${req.file.filename}`;
+      }
+
+      let relatedLinks = eventData.relatedLinks;
+      if (typeof relatedLinks === 'string') {
+        try {
+          relatedLinks = JSON.parse(relatedLinks);
+        } catch {
+          relatedLinks = relatedLinks
+            .split(',')
+            .map((v: string) => v.trim())
+            .filter((v: string) => v.length > 0);
+        }
+      }
+      const latitude =
+        eventData.latitude !== undefined && eventData.latitude !== ''
+          ? parseFloat(eventData.latitude)
+          : undefined;
+      const longitude =
+        eventData.longitude !== undefined && eventData.longitude !== ''
+          ? parseFloat(eventData.longitude)
+          : undefined;
+
+      if (latitude !== undefined && Number.isNaN(latitude)) {
+        return res.status(400).json({ error: 'Latitude invalida.' });
+      }
+      if (longitude !== undefined && Number.isNaN(longitude)) {
+        return res.status(400).json({ error: 'Longitude invalida.' });
+      }
+
       if (!id) {
         return res.status(400).json({ error: 'ID é obrigatório' });
       }
 
-      const updatedEvent = await eventService.updateEvent(
-        id,
-        userId,
-        eventData
-      );
+      const updatedEvent = await eventService.updateEvent(id, userId, {
+        ...eventData,
+        ...(logoUrl ? { logoUrl } : {}),
+        ...(relatedLinks !== undefined ? { relatedLinks } : {}),
+        ...(latitude !== undefined ? { latitude } : {}),
+        ...(longitude !== undefined ? { longitude } : {}),
+      });
 
       logger.info({ eventId: id, userId }, 'Evento atualizado com sucesso');
       return res.status(200).json(updatedEvent);
@@ -139,16 +198,37 @@ class EventController {
       return res.status(500).json({ message: 'Falha ao buscar eventos.' });
     }
   }
-
   async listAll(req: Request, res: Response) {
     try {
-      const { categoria, dataInicio, dataFim, limit } = req.query;
+      const { categoria, dataInicio, dataFim, limit, nome } = req.query;
       const filters: any = {};
-      if (categoria) filters.categoria = categoria;
+
+      if (categoria) {
+        const categoriaValue = String(categoria).trim();
+        const categoriaId = Number(categoriaValue);
+
+        if (Number.isFinite(categoriaId)) {
+          filters.eventTypeId = categoriaId;
+        } else {
+          const type = await eventTypeRepository.findByName(categoriaValue);
+          if (!type) {
+            return res.json([]);
+          }
+          filters.eventTypeId = type.id;
+        }
+      }
+
       if (dataInicio || dataFim) {
         filters.data = {};
         if (dataInicio) filters.data.gte = new Date(dataInicio as string);
         if (dataFim) filters.data.lte = new Date(dataFim as string);
+      }
+      if (nome) {
+        const termo = String(nome);
+        filters.OR = [
+          { nome: { contains: termo, mode: 'insensitive' } },
+          { locationName: { contains: termo, mode: 'insensitive' } },
+        ];
       }
       const limitValue = limit ? parseInt(limit as string) : undefined;
       const events = await eventService.listAllEventsWithFilters(
@@ -159,6 +239,23 @@ class EventController {
     } catch (error: any) {
       console.error('Error listing all events:', error);
       return res.status(500).json({ message: 'Falha ao buscar eventos.' });
+    }
+  }
+
+  async search(req: Request, res: Response) {
+    try {
+      const query = req.query.q as string;
+
+      if (!query) {
+        return res.json([]);
+      }
+
+      const events = await eventService.searchEvents(query);
+
+      return res.json(events);
+    } catch (error: any) {
+      console.error('Error searching events:', error);
+      return res.status(500).json({ message: 'Erro ao realizar busca.' });
     }
   }
   async getPublicCalendar(req: Request, res: Response) {
@@ -178,3 +275,5 @@ class EventController {
 }
 
 export default new EventController();
+
+

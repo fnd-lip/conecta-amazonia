@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import Login from "../../pages/Login";
-import { BrowserRouter } from "react-router-dom";
+import { MemoryRouter } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
 // Mocks
@@ -18,9 +18,9 @@ jest.mock("jwt-decode", () => ({
 // Helpers
 function renderLogin() {
   return render(
-    <BrowserRouter>
+    <MemoryRouter>
       <Login />
-    </BrowserRouter>
+    </MemoryRouter>
   );
 }
 
@@ -29,13 +29,16 @@ describe("Login Page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
+    jest.restoreAllMocks(); // garante que spyOn(fetch) não vaza entre testes
   });
 
   test("renderiza formulário de login", () => {
     renderLogin();
 
+    // ✅ Texto real da tela
+    expect(screen.getByRole("heading", { name: /login/i })).toBeInTheDocument();
     expect(
-      screen.getByText(/login do gestor local/i)
+      screen.getByText(/acesse a área para gerenciar seus eventos/i)
     ).toBeInTheDocument();
 
     expect(screen.getByLabelText(/e-mail/i)).toBeInTheDocument();
@@ -53,9 +56,7 @@ describe("Login Page", () => {
   });
 
   test("exibe estado de loading ao submeter formulário", async () => {
-    jest
-      .spyOn(global, "fetch")
-      .mockImplementation(() => new Promise(() => {}));
+    jest.spyOn(global, "fetch").mockImplementation(() => new Promise(() => {}));
 
     renderLogin();
 

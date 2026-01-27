@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import './Login.css';
 
@@ -95,23 +95,34 @@ function Login() {
         return;
       }
 
-      // salva o token no localStorage
       localStorage.setItem('token', data.token);
 
-      // decodifica o token para obter o papel do usuário
       try {
         const payload = jwtDecode<TokenPayload>(data.token);
-        
-        // redireciona baseado no papel
-        if (payload.role === 'Administrador') {
-          navigate('/admin');
-        } else {
-          navigate('/gestor/eventos');
-        }
+
+        const userRole = payload.role ? payload.role.toUpperCase().trim() : '';
+
+        const roleRoutes: Record<string, string> = {
+          ADMIN: '/admin',
+          ADMINISTRADOR: '/admin',
+          GESTOR: '/gestor/eventos',
+          TURISTA: '/perfil',
+        };
+
+        // Encontra a rota ou manda para login se não achar
+        const targetRoute = roleRoutes[userRole] || '/login';
+
+        console.log(
+          'Login efetuado. Role:',
+          userRole,
+          'Redirecionando para:',
+          targetRoute
+        );
+        navigate(targetRoute);
       } catch (tokenError) {
         console.error('Erro ao decodificar token:', tokenError);
-        // fallback para gestor/eventos em caso de erro
-        navigate('/gestor/eventos');
+        localStorage.removeItem('token'); // Limpa token ruim
+        navigate('/login');
       }
     } catch (error) {
       console.error(error);
@@ -126,9 +137,9 @@ function Login() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1 className="login-title">Login do Gestor Local</h1>
+        <h1 className="login-title">Login</h1>
         <p className="login-subtitle">
-          Acesse a área administrativa para gerenciar seus eventos.
+          Acesse a área para gerenciar seus eventos.
         </p>
 
         <form onSubmit={handleSubmit} noValidate>
@@ -172,6 +183,15 @@ function Login() {
             {isSubmitting ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
+        <div className="text-center text-sm text-slate-500">
+          Ainda possui uma conta?{' '}
+          <Link
+            to="/cadastro"
+            className="text-emerald-600 font-bold hover:text-emerald-700 hover:underline transition-all"
+          >
+            Cadastre-se!
+          </Link>
+        </div>
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ type ApiEvent = {
   nome: string;
   categoria?: string;
   data?: string;
+  logoUrl?: string | null;
 };
 
 export type EventCarouselFilters = {
@@ -22,7 +23,7 @@ type Props = {
   emptyMessage?: string;
 };
 
-const fallbackImages = ['/banners/banner1.jpg', '/banners/banner2.jpg', '/banners/banner3.jpg'];
+const fallbackImages = ['/icons/event-placeholder.svg'];
 
 function apiBaseUrl() {
   return 'http://localhost:3001';
@@ -34,6 +35,19 @@ function formatDatePtBR(dateString?: string) {
   if (Number.isNaN(date.getTime())) return dateString;
   return date.toLocaleString('pt-BR');
 }
+
+function formatCategory(value?: string) {
+  if (!value) return '';
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+const resolveImageUrl = (url: string) =>
+  url.startsWith('http') ? url : `${apiBaseUrl()}${url}`;
+
+const getEventImage = (event: ApiEvent, index: number) =>
+  event.logoUrl
+    ? resolveImageUrl(event.logoUrl)
+    : fallbackImages[index % fallbackImages.length];
 
 export default function EventCardsCarouselSection({
   title,
@@ -67,7 +81,9 @@ export default function EventCardsCarouselSection({
         const list = Array.isArray(data) ? data : [];
 
         const limited =
-          typeof filters?.limit === 'number' ? list.slice(0, filters.limit) : list;
+          typeof filters?.limit === 'number'
+            ? list.slice(0, filters.limit)
+            : list;
 
         setEvents(limited);
       } catch (e) {
@@ -110,8 +126,10 @@ export default function EventCardsCarouselSection({
                   nome: ev.nome,
                   categoria: ev.categoria,
                   data: ev.data,
-                  imagem: fallbackImages[idx % fallbackImages.length], // placeholder
-                  local: ev.categoria ? `${ev.categoria}` : 'Local do evento',
+                  imagem: getEventImage(ev, idx),
+                  local: ev.categoria
+                    ? formatCategory(ev.categoria)
+                    : 'Local do evento',
                 }}
                 formattedDate={formatDatePtBR(ev.data)}
               />
@@ -119,7 +137,12 @@ export default function EventCardsCarouselSection({
         </div>
 
         {/* seta do lado direito (igual ao exemplo) */}
-        <button className="carousel-arrow" type="button" onClick={scrollRight} aria-label="Avançar">
+        <button
+          className="carousel-arrow"
+          type="button"
+          onClick={scrollRight}
+          aria-label="Avançar"
+        >
           ›
         </button>
       </div>

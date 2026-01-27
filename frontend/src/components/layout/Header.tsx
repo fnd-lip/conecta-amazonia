@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -13,6 +14,7 @@ import {
   CircleUser,
   LogIn,
   Menu,
+  Sparkles,
   User,
 } from 'lucide-react';
 import {
@@ -23,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar } from '@/components/ui/avatar';
+import AssistantChat from '../assistant/AssistantChat';
 
 import logo from '@/assets/conecta.svg';
 import { getUserInfo, isAdmin } from '../../auth-utils';
@@ -157,6 +160,7 @@ export default function Header() {
   const token = localStorage.getItem('token');
   const userInfo = getUserInfo() as UserInfo | null;
   const adminUser = isAdmin();
+  const [assistantOpen, setAssistantOpen] = useState(false);
 
   function handleLogout() {
     localStorage.removeItem('token');
@@ -173,6 +177,15 @@ export default function Header() {
 
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-4">
+          <Button
+            variant="secondary"
+            size="sm"
+            className="bg-white text-green-900 hover:bg-green-100"
+            onClick={() => setAssistantOpen(true)}
+          >
+            <Sparkles className="mr-2 h-4 w-4" />
+            Nara
+          </Button>
           {adminUser ? (
             <Link to="/admin">
               <Button variant="ghost" size="sm">
@@ -265,7 +278,15 @@ export default function Header() {
         </div>
 
         {/* Mobile */}
-        <div className="md:hidden">
+        <div className="md:hidden flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Abrir assistente"
+            onClick={() => setAssistantOpen(true)}
+          >
+            <Sparkles className="h-5 w-5" />
+          </Button>
           <MobileMenu
             token={token}
             adminUser={adminUser}
@@ -274,6 +295,10 @@ export default function Header() {
           />
         </div>
       </div>
+      <AssistantChat
+        open={assistantOpen}
+        onClose={() => setAssistantOpen(false)}
+      />
     </header>
   );
 }

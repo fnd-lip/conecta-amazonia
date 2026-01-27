@@ -252,10 +252,12 @@ router.get('/mine', authMiddleware, (req, res) =>
  *       500:
  *         description: Erro interno do servidor
  */
+
+router.get('/search', eventController.search);
 router.get('/calendar', (req, res) =>
   eventController.getPublicCalendar(req, res)
 );
-router.put('/:id', authMiddleware, (req, res) =>
+router.put('/:id', authMiddleware, upload.single('logo'), (req, res) =>
   eventController.update(req, res)
 );
 router.delete('/:id', authMiddleware, (req, res) =>

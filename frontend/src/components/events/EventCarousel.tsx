@@ -6,6 +6,7 @@ interface CarouselEvent {
   nome: string;
   data?: string;
   imagem?: string | null;
+  logoUrl?: string | null;
 }
 
 interface Props {
@@ -14,22 +15,35 @@ interface Props {
   error: string | null;
 }
 
-const fallbackImages = [
-  '/banners/banner1.jpg',
-  '/banners/banner2.jpg',
-  '/banners/banner3.jpg',
-];
+const fallbackImages = ['/icons/event-placeholder.svg'];
 
-const getImage = (event: CarouselEvent, index: number) =>
-  event.imagem ?? fallbackImages[index % fallbackImages.length];
+const apiBaseUrl = () => 'http://localhost:3001';
+
+const resolveImageUrl = (url: string) =>
+  url.startsWith('http') ? url : `${apiBaseUrl()}${url}`;
+
+const normalizeImageValue = (value?: string | null) => {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed === 'null' || trimmed === 'undefined') return null;
+  return trimmed;
+};
+
+const getImage = (event: CarouselEvent, index: number) => {
+  const imagem = normalizeImageValue(event.imagem);
+  if (imagem) return imagem;
+  const logoUrl = normalizeImageValue(event.logoUrl);
+  if (logoUrl) return resolveImageUrl(logoUrl);
+  return fallbackImages[index % fallbackImages.length];
+};
 
 const formatDate = (dateString?: string) => {
   if (!dateString) return '';
-  
+
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) {
-      return dateString; 
+      return dateString;
     }
     return date.toLocaleDateString('pt-BR');
   } catch {

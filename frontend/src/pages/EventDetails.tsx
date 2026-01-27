@@ -40,6 +40,9 @@ function formatDate(isoDate: string) {
   );
 }
 
+const resolveImageUrl = (url: string) =>
+  url.startsWith('http') ? url : `http://localhost:3001${url}`;
+
 export default function EventDetails() {
   const { id } = useParams<{ id: string }>();
   const [event, setEvent] = useState<EventData | null>(null);
@@ -99,7 +102,7 @@ export default function EventDetails() {
         className="event-hero"
         style={
           event.logoUrl
-            ? { backgroundImage: `url(http://localhost:3001${event.logoUrl})` }
+            ? { backgroundImage: `url(${resolveImageUrl(event.logoUrl)})` }
             : {}
         }
       >

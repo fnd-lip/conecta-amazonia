@@ -11,22 +11,22 @@ jest.mock("react-router-dom", () => ({
   useNavigate: () => mockNavigate,
 }));
 
-// mock do auth-utils
+// mock do auth-utils (mantém as funções como jest.fn)
 jest.mock("../../../auth-utils", () => ({
   isAuthenticated: jest.fn(),
   isAdmin: jest.fn(),
 }));
 
-// mock do Form 
-jest.mock("../../../pages/Form", () => {
-  return function MockForm() {
+// mock do componente que Eventos realmente usa no Dialog
+jest.mock("../../../components/events/EventFormDialog", () => {
+  return function MockEventFormDialog() {
     return <div>Formulário de Evento</div>;
   };
 });
 
-// helper para mockar fetch corretamente
-const mockFetch = (data: unknown) => {
-  global.fetch = jest.fn().mockResolvedValue({
+// helper para mockar fetch
+const mockFetchOk = (data: unknown) => {
+  (global.fetch as jest.Mock).mockResolvedValueOnce({
     ok: true,
     status: 200,
     json: async () => data,
@@ -43,7 +43,10 @@ describe("Página Eventos (Gestor)", () => {
     (authUtils.isAuthenticated as jest.Mock).mockReturnValue(true);
     (authUtils.isAdmin as jest.Mock).mockReturnValue(false);
 
-    mockFetch({ events: [] });
+    // fetch pendente pra garantir que o loading apareça
+    (global.fetch as jest.Mock).mockImplementationOnce(
+      () => new Promise<never>(() => {})
+    );
 
     render(
       <MemoryRouter>
@@ -51,9 +54,7 @@ describe("Página Eventos (Gestor)", () => {
       </MemoryRouter>
     );
 
-    expect(
-      await screen.findByText(/carregando eventos/i)
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/carregando eventos/i)).toBeInTheDocument();
   });
 
   test("redireciona para login se não estiver autenticado", async () => {
@@ -90,7 +91,7 @@ describe("Página Eventos (Gestor)", () => {
     (authUtils.isAuthenticated as jest.Mock).mockReturnValue(true);
     (authUtils.isAdmin as jest.Mock).mockReturnValue(false);
 
-    mockFetch({ events: [] });
+    mockFetchOk({ events: [] });
 
     render(
       <MemoryRouter>
@@ -98,23 +99,21 @@ describe("Página Eventos (Gestor)", () => {
       </MemoryRouter>
     );
 
-    expect(
-      await screen.findByText(/nenhum evento cadastrado/i)
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/nenhum evento cadastrado/i)).toBeInTheDocument();
   });
 
   test("exibe lista de eventos quando API retorna dados", async () => {
     (authUtils.isAuthenticated as jest.Mock).mockReturnValue(true);
     (authUtils.isAdmin as jest.Mock).mockReturnValue(false);
 
-    mockFetch({
+    mockFetchOk({
       events: [
         {
           id: "1",
           nome: "Evento Teste",
           descricao: "Descrição do evento",
           data: "2024-01-01T10:00:00Z",
-          categoria: "Cultura",
+          categoria: "cultura",
           children: [],
         },
       ],
@@ -126,24 +125,18 @@ describe("Página Eventos (Gestor)", () => {
       </MemoryRouter>
     );
 
-    expect(
-      await screen.findByText(/evento teste/i)
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/evento teste/i)).toBeInTheDocument();
+    expect(screen.getByText(/descrição do evento/i)).toBeInTheDocument();
 
-    expect(
-      screen.getByText(/descrição do evento/i)
-    ).toBeInTheDocument();
-
-    expect(
-      screen.getByText(/cultura/i)
-    ).toBeInTheDocument();
+    // em Eventos.tsx você usa formatCategory() => primeira letra maiúscula
+    expect(screen.getByText(/cultura/i)).toBeInTheDocument();
   });
 
   test("abre formulário ao clicar em 'Novo Evento'", async () => {
     (authUtils.isAuthenticated as jest.Mock).mockReturnValue(true);
     (authUtils.isAdmin as jest.Mock).mockReturnValue(false);
 
-    mockFetch({ events: [] });
+    mockFetchOk({ events: [] });
 
     render(
       <MemoryRouter>
@@ -151,14 +144,9 @@ describe("Página Eventos (Gestor)", () => {
       </MemoryRouter>
     );
 
-    const button = await screen.findByRole("button", {
-      name: /novo evento/i,
-    });
-
+    const button = await screen.findByRole("button", { name: /novo evento/i });
     fireEvent.click(button);
 
-    expect(
-      screen.getByText(/formulário de evento/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/formulário de evento/i)).toBeInTheDocument();
   });
 });

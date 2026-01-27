@@ -26,6 +26,21 @@
   color: #333;
 }
 
+.filter-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.loading-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #ccc;
+  border-top-color: #4caf50;
+  border-radius: 50%;
+  animation: spinner-rotate 0.8s linear infinite;
+}
+
 .filter-group select,
 .filter-group input[type='date'] {
   padding: 0.6rem;
@@ -104,5 +119,14 @@
   .btn-clear-filters {
     width: 100%;
     align-self: stretch;
+  }
+}
+
+@keyframes spinner-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }

@@ -1,45 +1,66 @@
 import prisma from '../../config/prisma';
 import { CreateEventDTO } from './event.types';
 
+type EventWithType = any;
+
+const mapEventCategory = (event: EventWithType | null) => {
+  if (!event) return event;
+  const categoria = event.eventType?.nome || null;
+  const mapped = { ...event, categoria };
+  if (Array.isArray(event.children)) {
+    mapped.children = event.children.map((child: EventWithType) =>
+      mapEventCategory(child)
+    );
+  }
+  return mapped;
+};
+
 export class EventRepository {
   async create(data: CreateEventDTO) {
-    return prisma.event.create({
+    const created = await prisma.event.create({
       data: {
         nome: data.nome,
         descricao: data.descricao,
         data: new Date(data.data),
-        categoria: data.categoria,
+        eventTypeId: data.eventTypeId!,
         userId: data.userId!,
         parentId: data.parentId ?? null,
         logoUrl: data.logoUrl ?? null,
         externalLink: data.externalLink ?? null,
         relatedLinks: data.relatedLinks ?? [],
+        latitude: data.latitude ?? null,
+        longitude: data.longitude ?? null,
+        locationName: data.locationName ?? null,
         ...(data.subeventos && {
           children: {
             create: data.subeventos.map((se) => ({
               nome: se.nome,
               descricao: se.descricao,
               data: new Date(se.data),
-              categoria: se.categoria,
+              eventTypeId: se.eventTypeId!,
               userId: data.userId!,
             })),
           },
         }),
       },
       include: {
-        children: true,
+        eventType: true,
+        children: { include: { eventType: true } },
       },
     });
+
+    return mapEventCategory(created);
   }
 
   async findByUserId(userId: string) {
-    return prisma.event.findMany({
+    const events = await prisma.event.findMany({
       where: {
         userId,
         parentId: null,
       },
       include: {
-        children: true,
+        eventType: true,
+        children: { include: { eventType: true } },
         user: {
           select: {
             id: true,
@@ -52,47 +73,57 @@ export class EventRepository {
         data: 'desc',
       },
     });
+
+    return events.map((event) => mapEventCategory(event));
   }
 
   async findById(id: string) {
-    return prisma.event.findUnique({
+    const event = await prisma.event.findUnique({
       where: { id },
-      include: { children: true },
+      include: { eventType: true, children: { include: { eventType: true } } },
     });
+
+    return mapEventCategory(event);
   }
 
   async deleteById(id: string) {
-    // Excluir subeventos primeiro (se houver)
     await prisma.event.deleteMany({
       where: { parentId: id },
     });
 
-    // Excluir evento principal
     return prisma.event.delete({
       where: { id },
     });
   }
 
   async updateById(id: string, data: Partial<CreateEventDTO>) {
-    return prisma.event.update({
+    const updated = await prisma.event.update({
       where: { id },
       data: {
         ...(data.nome && { nome: data.nome }),
         ...(data.descricao && { descricao: data.descricao }),
         ...(data.data && { data: new Date(data.data) }),
-        ...(data.categoria && { categoria: data.categoria }),
+        ...(data.eventTypeId && { eventTypeId: data.eventTypeId }),
         ...(data.logoUrl && { logoUrl: data.logoUrl }),
         ...(data.externalLink && { externalLink: data.externalLink }),
         ...(data.relatedLinks && { relatedLinks: data.relatedLinks }),
+        ...(data.latitude !== undefined && { latitude: data.latitude }),
+        ...(data.longitude !== undefined && { longitude: data.longitude }),
+        ...(data.locationName !== undefined && {
+          locationName: data.locationName,
+        }),
       },
       include: {
-        children: true,
+        eventType: true,
+        children: { include: { eventType: true } },
       },
     });
+
+    return mapEventCategory(updated);
   }
 
   async findAll(limit: number) {
-    return prisma.event.findMany({
+    const events = await prisma.event.findMany({
       where: {
         parentId: null,
       },
@@ -103,14 +134,20 @@ export class EventRepository {
       select: {
         id: true,
         nome: true,
-        categoria: true,
         data: true,
+        logoUrl: true,
+        latitude: true,
+        longitude: true,
+        locationName: true,
+        eventType: { select: { nome: true } },
       },
     });
+
+    return events.map((event) => mapEventCategory(event));
   }
 
   async findAllWithFilters(filters: any, limit: number = 50) {
-    return prisma.event.findMany({
+    const events = await prisma.event.findMany({
       where: {
         parentId: null,
         ...filters,
@@ -122,13 +159,20 @@ export class EventRepository {
       select: {
         id: true,
         nome: true,
-        categoria: true,
         data: true,
+        logoUrl: true,
+        latitude: true,
+        longitude: true,
+        locationName: true,
+        eventType: { select: { nome: true } },
       },
     });
+
+    return events.map((event) => mapEventCategory(event));
   }
+
   async findPublicByDateRange(startDate: Date, endDate: Date) {
-    return prisma.event.findMany({
+    const events = await prisma.event.findMany({
       where: {
         parentId: null,
         data: {
@@ -137,6 +181,35 @@ export class EventRepository {
         },
       },
       orderBy: { data: 'asc' },
+      include: { eventType: true },
     });
+
+    return events.map((event) => mapEventCategory(event));
+  }
+
+  async findBySearchTerm(term: string, limit: number = 10) {
+    const events = await prisma.event.findMany({
+      where: {
+        parentId: null,
+        OR: [
+          { nome: { contains: term, mode: 'insensitive' } },
+          { locationName: { contains: term, mode: 'insensitive' } },
+        ],
+      },
+      orderBy: {
+        data: 'asc',
+      },
+      take: limit,
+      select: {
+        id: true,
+        nome: true,
+        locationName: true,
+        data: true,
+        logoUrl: true,
+        eventType: { select: { nome: true } },
+      },
+    });
+
+    return events.map((event) => mapEventCategory(event));
   }
 }

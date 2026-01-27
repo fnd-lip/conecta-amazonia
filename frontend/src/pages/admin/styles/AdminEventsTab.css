@@ -1,0 +1,42 @@
+.events-tab h2 {
+  color: #343a40;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.type-badge,
+.category-badge,
+.role-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.type-badge.principal {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.type-badge.subevento {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.category-badge {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+
+.subevent-count {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.no-subevent {
+  color: #6c757d;
+  font-style: italic;
+}

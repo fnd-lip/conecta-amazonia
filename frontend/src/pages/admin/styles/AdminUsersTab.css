@@ -1,0 +1,17 @@
+.users-tab h2 {
+  color: #343a40;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.role-badge.administrador {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.role-badge.gestor-local {
+  background-color: #d4edda;
+  color: #155724;
+}

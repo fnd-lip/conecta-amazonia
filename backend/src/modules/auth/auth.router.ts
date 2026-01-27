@@ -1,7 +1,16 @@
 import { Router } from 'express';
-import authController from './auth.controller';
+
+import AuthController from './auth.controller';
+import AuthService from './auth.service';
+import AuthRepository from './auth.repository';
+import { MailService } from '../../services/mail.service';
 
 const router = Router();
+
+const mailService = new MailService();
+const authRepository = new AuthRepository();
+const authService = new AuthService(authRepository, mailService);
+const authController = new AuthController(authService);
 
 /**
  * @swagger
@@ -65,6 +74,10 @@ const router = Router();
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/login', (req, res) => authController.login(req, res));
 
+router.post('/register', (req, res) => authController.register(req, res));
+router.post('/login', (req, res) => authController.login(req, res));
+router.post('/verify-email', (req, res) =>
+  authController.verifyEmail(req, res)
+);
 export default router;

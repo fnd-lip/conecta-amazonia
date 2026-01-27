@@ -32,9 +32,7 @@ describe("HeroSection", () => {
 
     render(<HeroSection />);
 
-    expect(
-      screen.getByText(/carregando eventos/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/carregando eventos/i)).toBeInTheDocument();
   });
 
   test("exibe mensagem de erro quando a API falha", async () => {
@@ -45,9 +43,7 @@ describe("HeroSection", () => {
     render(<HeroSection />);
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/erro ao carregar eventos/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/erro ao carregar eventos/i)).toBeInTheDocument();
     });
   });
 
@@ -55,14 +51,12 @@ describe("HeroSection", () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
       json: async () => [],
-    });
+    } as Response);
 
     render(<HeroSection />);
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/nenhum evento encontrado/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/nenhum evento encontrado/i)).toBeInTheDocument();
     });
   });
 });

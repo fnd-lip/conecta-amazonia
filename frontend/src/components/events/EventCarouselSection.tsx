@@ -14,6 +14,7 @@ type ApiEvent = {
   nome: string;
   categoria?: string;
   data?: string;
+  logoUrl?: string | null;
 };
 
 type Props = {
@@ -26,11 +27,7 @@ function apiBaseUrl() {
   return 'http://localhost:3001';
 }
 
-const fallbackImages = [
-  '/banners/banner1.jpg',
-  '/banners/banner2.jpg',
-  '/banners/banner3.jpg',
-];
+const fallbackImages = ['/icons/event-placeholder.svg'];
 
 function formatDatePtBR(dateString?: string) {
   if (!dateString) return '';
@@ -38,6 +35,17 @@ function formatDatePtBR(dateString?: string) {
   if (Number.isNaN(date.getTime())) return dateString;
   return date.toLocaleString('pt-BR');
 }
+
+function formatCategory(value?: string) {
+  if (!value) return '';
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+const resolveImageUrl = (url: string) =>
+  url.startsWith('http') ? url : `${apiBaseUrl()}${url}`;
+
+const getEventImage = (event: ApiEvent, index: number) =>
+  event.logoUrl ? resolveImageUrl(event.logoUrl) : fallbackImages[index % fallbackImages.length];
 
 export function EventCarouselSection({
   title,
@@ -89,9 +97,9 @@ export function EventCarouselSection({
   const showEmpty = !loading && !error && events.length === 0;
 
   return (
-    <section className="w-full py-8">
+    <section className="w-full py-8 px-4">
       {/* Header com título e Ver tudo */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 ">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
           {title}
         </h2>
@@ -121,7 +129,7 @@ export function EventCarouselSection({
           }}
           className="w-full"
         >
-          <CarouselContent className="-ml-4">
+          <CarouselContent className="-ml-4 sm:-ml-0">
             {events.map((ev, idx) => (
               <CarouselItem
                 key={ev.id}
@@ -134,8 +142,10 @@ export function EventCarouselSection({
                     nome: ev.nome,
                     categoria: ev.categoria,
                     data: ev.data,
-                    imagem: fallbackImages[idx % fallbackImages.length],
-                    local: ev.categoria ? `${ev.categoria}` : 'Local do evento',
+                    imagem: getEventImage(ev, idx),
+                    local: ev.categoria
+                      ? formatCategory(ev.categoria)
+                      : 'Local do evento',
                   }}
                   formattedDate={formatDatePtBR(ev.data)}
                 />

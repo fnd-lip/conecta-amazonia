@@ -1,6 +1,8 @@
 import './EventCard.css';
 import { useNavigate } from 'react-router-dom';
 
+const placeholderIcon = '/icons/event-placeholder.svg';
+
 type BaseEvent = {
   id: string;
   nome: string;
@@ -41,7 +43,13 @@ export default function EventCard({
           {event.imagem ? (
             <img src={event.imagem} alt={event.nome} />
           ) : (
-            <div className="event-card-carousel__thumb-placeholder" />
+            <div className="event-card-carousel__thumb-placeholder">
+              <img
+                src={placeholderIcon}
+                alt="Evento sem imagem"
+                className="event-card-carousel__thumb-icon"
+              />
+            </div>
           )}
         </div>
 
@@ -72,12 +80,16 @@ export default function EventCard({
       }}
     >
       <div className="event-circle">
-        <span className="event-letter">{event.nome.charAt(0).toUpperCase()}</span>
+        <span className="event-letter">
+          {event.nome.charAt(0).toUpperCase()}
+        </span>
       </div>
 
       <h3 className="event-title">{event.nome}</h3>
 
-      {event.descricao && <p className="event-description">{event.descricao}</p>}
+      {event.descricao && (
+        <p className="event-description">{event.descricao}</p>
+      )}
       {event.categoria && <p className="event-meta">{event.categoria}</p>}
       {event.data && (
         <p className="event-meta">

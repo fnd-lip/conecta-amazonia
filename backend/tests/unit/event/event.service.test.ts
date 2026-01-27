@@ -3,6 +3,7 @@ import { EventService } from '../../../src/modules/event/event.service';
 describe('EventService', () => {
   let eventService: EventService;
   let eventRepositoryMock: any;
+  let eventTypeRepositoryMock: any;
 
   beforeEach(() => {
     eventRepositoryMock = {
@@ -14,7 +15,11 @@ describe('EventService', () => {
       findByUserId: jest.fn(),
     };
 
-    eventService = new EventService(eventRepositoryMock);
+    eventTypeRepositoryMock = {
+      existsByName: jest.fn().mockResolvedValue(true),
+    };
+
+    eventService = new EventService(eventRepositoryMock, eventTypeRepositoryMock);
   });
 
   it('deve criar evento com dados válidos', async () => {

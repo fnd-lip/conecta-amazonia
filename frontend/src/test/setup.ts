@@ -1,4 +1,7 @@
+import "@testing-library/jest-dom/jest-globals";
 import "@testing-library/jest-dom";
+
+
 import { TextEncoder, TextDecoder } from "util";
 
 Object.assign(globalThis, {
@@ -6,4 +9,4 @@ Object.assign(globalThis, {
   TextDecoder,
 });
 
-global.fetch = jest.fn();
+globalThis.fetch = jest.fn();

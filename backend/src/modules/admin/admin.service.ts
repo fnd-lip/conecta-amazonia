@@ -2,7 +2,17 @@ import { AdminRepository } from './admin.repository';
 
 class AdminService {
   static async getAllEvents() {
-    return await AdminRepository.findAllEvents();
+    const events = await AdminRepository.findAllEvents();
+    return events.map(event => ({
+      ...event,
+      categoria: event.eventType?.nome ?? null,
+      children: Array.isArray(event.children)
+        ? event.children.map(child => ({
+            ...child,
+            categoria: child.eventType?.nome ?? null
+          }))
+        : event.children
+    }));
   }
 
   static async getAllUsers() {

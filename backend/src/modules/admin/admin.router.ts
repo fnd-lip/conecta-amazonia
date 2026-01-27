@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { AdminController } from './admin.controller';
+import { EventTypeController } from '../event-type/event-type.controller';
 import { authMiddleware } from '../../middlewares/auth.middleware';
 import { authorize } from '../../middlewares/acesso.middleware';
 
@@ -81,5 +82,10 @@ router.get('/events', AdminController.getAllEvents);
  *         description: Erro interno do servidor
  */
 router.get('/users', AdminController.getAllUsers);
+
+router.get('/event-types', EventTypeController.list);
+router.post('/event-types', EventTypeController.create);
+router.put('/event-types/:id', EventTypeController.update);
+router.delete('/event-types/:id', EventTypeController.delete);
 
 export default router;
