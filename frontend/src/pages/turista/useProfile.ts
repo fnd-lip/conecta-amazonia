@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { UserData, ProfileFormData } from './profile.schema';
+import { API_URL } from '@/config/api';
+
 
 interface UpdateProfilePayload {
   name?: string;
   email?: string;
   password?: string;
 }
-
-const API_URL = 'http://localhost:3001';
 
 export function useProfile() {
   const [user, setUser] = useState<UserData | null>(null);

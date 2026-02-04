@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { API_URL } from '@/config/api';
 
 interface UserRegistrationFormProps {
   onCancel?: () => void;
@@ -78,7 +79,7 @@ export function UserRegistrationForm({
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const response = await fetch('http://localhost:3001/auth/register', {
+      const response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

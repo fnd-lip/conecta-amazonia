@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { API_URL } from '@/config/api';
 import './EventFilters.css';
 
 interface EventFiltersProps {
@@ -46,7 +47,7 @@ export default function EventFilters({ onFilterChange }: EventFiltersProps) {
     if (eventTypesLoading) return;
     setEventTypesLoading(true);
     try {
-      const res = await fetch('http://localhost:3001/event-types');
+      const res = await fetch(`${API_URL}/event-types`);
       const data = await res.json();
       setEventTypes(Array.isArray(data) ? data : []);
     } catch {

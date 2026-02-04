@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_URL } from '@/config/api';
 import './TicketLotManager.css';
 
 interface TicketLot {
@@ -46,7 +47,7 @@ function TicketLotManager({ eventId, onLotsChange }: TicketLotManagerProps) {
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(
-        `http://localhost:3001/event-ticket-lot/${eventId}/tickets/lots`,
+        `${API_URL}/event-ticket-lot/${eventId}/tickets/lots`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -106,7 +107,7 @@ function TicketLotManager({ eventId, onLotsChange }: TicketLotManagerProps) {
       if (editingLot?.id) {
         // Atualizar lote existente
         const res = await fetch(
-          `http://localhost:3001/event-ticket-lot/tickets/lots/${editingLot.id}`,
+          `${API_URL}/event-ticket-lot/tickets/lots/${editingLot.id}`,
           {
             method: 'PUT',
             headers: {
@@ -129,7 +130,7 @@ function TicketLotManager({ eventId, onLotsChange }: TicketLotManagerProps) {
       } else {
         // Criar novo lote
         const res = await fetch(
-          `http://localhost:3001/event-ticket-lot/${eventId}/tickets/lots`,
+          `${API_URL}/event-ticket-lot/${eventId}/tickets/lots`,
           {
             method: 'POST',
             headers: {
@@ -181,7 +182,7 @@ function TicketLotManager({ eventId, onLotsChange }: TicketLotManagerProps) {
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(
-        `http://localhost:3001/event-ticket-lot/tickets/lots/${lotId}`,
+        `${API_URL}/event-ticket-lot/tickets/lots/${lotId}`,
         {
           method: 'DELETE',
           headers: {

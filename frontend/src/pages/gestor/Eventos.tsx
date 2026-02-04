@@ -22,6 +22,7 @@ import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Card, CardContent } from '../../components/ui/card';
 import './Eventos.css';
+import { API_URL } from '@/config/api';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 
 interface Event {
@@ -64,7 +65,7 @@ export default function Eventos() {
   const fetchEvents = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/events/mine', {
+      const response = await fetch(`${API_URL}/events/mine`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -136,7 +137,7 @@ export default function Eventos() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/events/${eventId}`, {
+      const response = await fetch(`${API_URL}/events/${eventId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,

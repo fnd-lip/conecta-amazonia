@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Search, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { API_URL } from '@/config/api'; 
 
 export interface AutocompleteEvent {
   id: string;
@@ -35,7 +36,7 @@ export function EventAutocomplete({
         setIsSearching(true);
         try {
           const res = await fetch(
-            `http://localhost:3001/events/search?q=${query}`
+            `${API_URL}/events/search?q=${encodeURIComponent(query)}`
           );
           if (res.ok) {
             const data = await res.json();

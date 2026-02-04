@@ -5,6 +5,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Separator } from '../ui/separator';
 import { ScrollArea } from '../ui/scroll-area';
+import { API_URL } from '@/config/api';
 import './EventFormDialog.css';
 
 interface EventFormDialogProps {
@@ -81,7 +82,7 @@ function EventFormDialog({
     if (eventTypesLoading) return;
     setEventTypesLoading(true);
     try {
-      const res = await fetch('http://localhost:3001/event-types');
+      const res = await fetch(`${API_URL}/event-types`);
       const data = await res.json();
       setEventTypes(Array.isArray(data) ? data : []);
     } catch {
@@ -92,7 +93,7 @@ function EventFormDialog({
   }, [eventTypesLoading]);
 
   useEffect(() => {
-    fetch('http://localhost:3001/events/all')
+    fetch(`${API_URL}/events/all`)
       .then((res) => res.json())
       .then((data) => {
         const eventos: EventoPai[] = Array.isArray(data)
@@ -284,8 +285,8 @@ function EventFormDialog({
     try {
       const token = localStorage.getItem('token');
       const url = isEditing
-        ? `http://localhost:3001/events/${editingEvent.id}`
-        : 'http://localhost:3001/events';
+        ? `${API_URL}/events/${editingEvent.id}`
+        : `${API_URL}/events`;
       const method = isEditing ? 'PUT' : 'POST';
 
       const formDataToSend = new FormData();

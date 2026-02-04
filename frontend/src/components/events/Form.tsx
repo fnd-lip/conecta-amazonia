@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import LocationPicker from './LocationPicker';
 import TicketLotManager from './TicketLotManager';
+import { API_URL } from '@/config/api';
 import './Form.css';
 
 interface FormProps {
@@ -69,7 +70,7 @@ function Form({ onSuccess, editingEvent, onCancel }: FormProps) {
     if (eventTypesLoading) return;
     setEventTypesLoading(true);
     try {
-      const res = await fetch('http://localhost:3001/event-types');
+      const res = await fetch(`${API_URL}/event-types`);
       const data = await res.json();
       setEventTypes(Array.isArray(data) ? data : []);
     } catch {
@@ -81,7 +82,7 @@ function Form({ onSuccess, editingEvent, onCancel }: FormProps) {
 
   useEffect(() => {
     // Buscar eventos para seleção de evento pai
-    fetch('http://localhost:3001/events/all')
+    fetch(`${API_URL}/events/all`)
       .then((res) => res.json())
       .then((data) => {
         const eventos: EventoPai[] = Array.isArray(data)
@@ -273,8 +274,8 @@ function Form({ onSuccess, editingEvent, onCancel }: FormProps) {
     try {
       const token = localStorage.getItem('token');
       const url = isEditing
-        ? `http://localhost:3001/events/${editingEvent.id}`
-        : 'http://localhost:3001/events';
+        ? `${API_URL}/events/${editingEvent.id}`
+        : `${API_URL}/events`;
       const method = isEditing ? 'PUT' : 'POST';
 
       const formDataToSend = new FormData();

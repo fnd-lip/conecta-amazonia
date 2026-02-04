@@ -1,6 +1,8 @@
 // src/services/admin.api.ts
 import type { Event, User, EventType } from './admin.types';
 import { getToken } from '../../auth-utils';
+import { API_URL } from '@/config/api';
+
 
 export class ApiError extends Error {
   status?: number;
@@ -47,7 +49,7 @@ async function request<T>(
 
 export async function fetchAdminEvents() {
   return request<Event[]>(
-    'http://localhost:3001/admin/events',
+    `${API_URL}/admin/events`,
     {
       headers: getAuthHeaders(),
     },
@@ -57,7 +59,7 @@ export async function fetchAdminEvents() {
 
 export async function fetchAdminUsers() {
   return request<User[]>(
-    'http://localhost:3001/admin/users',
+    `${API_URL}/admin/users`,
     {
       headers: getAuthHeaders(),
     },
@@ -67,7 +69,7 @@ export async function fetchAdminUsers() {
 
 export async function fetchAdminEventTypes() {
   return request<EventType[]>(
-    'http://localhost:3001/admin/event-types',
+    `${API_URL}/admin/event-types`,
     {
       headers: getAuthHeaders(),
     },
@@ -77,7 +79,7 @@ export async function fetchAdminEventTypes() {
 
 export async function createAdminEventType(nome: string) {
   return request(
-    'http://localhost:3001/admin/event-types',
+    `${API_URL}/admin/event-types`,
     {
       method: 'POST',
       headers: getAuthHeaders(),
@@ -89,7 +91,7 @@ export async function createAdminEventType(nome: string) {
 
 export async function updateAdminEventType(id: number, nome: string) {
   return request(
-    `http://localhost:3001/admin/event-types/${id}`,
+    `${API_URL}/admin/event-types/${id}`,
     {
       method: 'PUT',
       headers: getAuthHeaders(),
@@ -101,7 +103,7 @@ export async function updateAdminEventType(id: number, nome: string) {
 
 export async function deleteAdminEventType(id: number) {
   return request(
-    `http://localhost:3001/admin/event-types/${id}`,
+    `${API_URL}/admin/event-types/${id}`,
     {
       method: 'DELETE',
       headers: getAuthHeaders(),

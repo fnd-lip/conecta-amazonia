@@ -103,7 +103,7 @@ export default function EventDetails() {
     }
 
     fetchEvent();
-  }, [id]);
+  }, [id, API_URL]);
 
   if (loading) {
     return (

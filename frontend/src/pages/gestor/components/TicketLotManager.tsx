@@ -65,7 +65,7 @@ function TicketLotManager({ eventId, onLotsChange }: TicketLotManagerProps) {
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(
-        `http://localhost:3001/event-ticket-lot/${eventId}/tickets/lots`,
+        `${API_URL}/event-ticket-lot/${eventId}/tickets/lots`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

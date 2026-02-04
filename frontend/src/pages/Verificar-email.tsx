@@ -64,7 +64,7 @@ export function VerifyEmailPage() {
     };
 
     verifyToken();
-  }, [token, navigate]);
+  }, [token, navigate, effectRan]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
