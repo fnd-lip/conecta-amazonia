@@ -1,3 +1,4 @@
+/// <reference types="jest" />
 import { EventService } from '../../../src/modules/event/event.service';
 
 describe('EventService', () => {
@@ -17,9 +18,13 @@ describe('EventService', () => {
 
     eventTypeRepositoryMock = {
       existsByName: jest.fn().mockResolvedValue(true),
+      findByName: jest.fn().mockResolvedValue({ id: 1, nome: 'cultura' }),
     };
 
-    eventService = new EventService(eventRepositoryMock, eventTypeRepositoryMock);
+    eventService = new EventService(
+      eventRepositoryMock,
+      eventTypeRepositoryMock
+    );
   });
 
   it('deve criar evento com dados válidos', async () => {
@@ -36,8 +41,12 @@ describe('EventService', () => {
     const result = await eventService.createEvent(eventData);
 
     expect(eventRepositoryMock.create).toHaveBeenCalledWith({
-      ...eventData,
+      nome: eventData.nome,
+      descricao: eventData.descricao,
+      categoria: eventData.categoria,
       data: expect.any(Date),
+      userId: eventData.userId,
+      eventTypeId: 1, // O serviço converte categoria para eventTypeId
     });
     expect(result.id).toBe('1');
   });
@@ -51,7 +60,7 @@ describe('EventService', () => {
     };
 
     await expect(eventService.createEvent(eventData)).rejects.toThrow(
-      'Usuário não identificado!'
+      'Usuario nao identificado!'
     );
   });
 
@@ -64,10 +73,15 @@ describe('EventService', () => {
         data: new Date(),
         userId: '123',
       })
-    ).rejects.toThrow('Preencha os campos obrigatórios!');
+    ).rejects.toThrow('Preencha os campos obrigatorios!');
   });
 
   it('deve lançar erro se a data for inválida', async () => {
+    eventTypeRepositoryMock.findByName.mockResolvedValue({
+      id: 1,
+      nome: 'cat',
+    });
+
     await expect(
       eventService.createEvent({
         nome: 'Evento',
@@ -76,7 +90,7 @@ describe('EventService', () => {
         data: new Date('invalid-date'),
         userId: '123',
       })
-    ).rejects.toThrow('Data inválida!');
+    ).rejects.toThrow('Data invalida!');
   });
 
   it('deve buscar evento por id', async () => {
@@ -88,7 +102,7 @@ describe('EventService', () => {
   it('deve lançar erro se evento não existir', async () => {
     eventRepositoryMock.findById.mockResolvedValue(null);
     await expect(eventService.getEventById('2')).rejects.toThrow(
-      'Evento não encontrado!'
+      'Evento nao encontrado!'
     );
   });
 

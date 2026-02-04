@@ -40,28 +40,30 @@ model EventType {
 }
 
 model TicketLot {
-  id        String      @id @default(uuid())
-  name      String      @db.VarChar(100)
-  price     Float
-  quantity  Int
-  active    Boolean     @default(true)
-  eventId   String
-  event     Event       @relation(fields: [eventId], references: [id])
-  orders    OrderItem[]
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id         String      @id @default(uuid())
+  name       String      @db.VarChar(100)
+  price      Float
+  quantity   Int
+  active     Boolean     @default(true)
+  maxPerUser Int?
+  eventId    String
+  event      Event       @relation(fields: [eventId], references: [id])
+  orders     OrderItem[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 }
 
 model Order {
-  id        String      @id @default(uuid())
-  userId    String
-  eventId   String
-  status    String      @db.VarChar(30)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  user      User        @relation(fields: [userId], references: [id])
-  event     Event       @relation(fields: [eventId], references: [id])
-  items     OrderItem[]
+  id          String             @id @default(uuid())
+  userId      String
+  eventId     String
+  status      String             @db.VarChar(30)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  user        User               @relation(fields: [userId], references: [id])
+  event       Event              @relation(fields: [eventId], references: [id])
+  items       OrderItem[]
+  validations TicketValidation[]
 }
 
 model OrderItem {
@@ -72,6 +74,17 @@ model OrderItem {
   price       Float
   order       Order     @relation(fields: [orderId], references: [id])
   ticketLot   TicketLot @relation(fields: [ticketLotId], references: [id])
+}
+
+model TicketValidation {
+  id          String   @id @default(uuid())
+  orderId     String
+  validatedBy String
+  validatedAt DateTime @default(now())
+  order       Order    @relation(fields: [orderId], references: [id])
+  validator   User     @relation(fields: [validatedBy], references: [id])
+
+  @@unique([orderId])
 }
 
 model UserType {
@@ -96,4 +109,5 @@ model User {
   isVerified          Boolean   @default(false)
   verificationExpires DateTime?
   verificationToken   String?
+  validations TicketValidation[]
 }

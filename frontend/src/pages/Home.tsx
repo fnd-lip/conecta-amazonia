@@ -17,6 +17,7 @@ import {
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import CalendarPage from '@/pages/CalendarPage';
 import { EventCarouselSection } from '@/components/events/EventCarouselSection';
+import { API_URL } from '@/config/api';
 interface EventData {
   id: string;
   nome: string;
@@ -29,7 +30,6 @@ interface EventData {
   locationName?: string | null;
 }
 
-
 interface FilterValues {
   categoria: string;
   dataInicio: string;
@@ -41,7 +41,7 @@ interface EventType {
   nome: string;
 }
 // Seção Hero (Carousel Principal)
-export const HeroSection = () => {
+const HeroSection = () => {
   const [events, setEvents] = useState<EventData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +52,7 @@ export const HeroSection = () => {
         setLoading(true);
         setError(null);
 
-        const res = await fetch('http://localhost:3001/events/all?limit=10');
+        const res = await fetch(`${API_URL}/events/all?limit=10`);
 
         if (!res.ok) {
           throw new Error('Erro ao buscar eventos');
@@ -106,7 +106,7 @@ const EventsMapSection = () => {
         if (filters.dataFim) params.append('dataFim', filters.dataFim);
         if (filters.busca) params.append('nome', filters.busca);
 
-        const url = `http://localhost:3001/events/all${params.toString() ? '?' + params.toString() : ''}`;
+        const url = `${API_URL}/events/all${params.toString() ? '?' + params.toString() : ''}`;
 
         const res = await fetch(url);
 
@@ -284,7 +284,7 @@ export default function Home() {
       try {
         setEventTypesLoading(true);
         setEventTypesError(null);
-        const res = await fetch('http://localhost:3001/event-types');
+        const res = await fetch(`${API_URL}/event-types`);
         if (!res.ok) {
           throw new Error('Erro ao carregar categorias');
         }
@@ -343,7 +343,3 @@ export default function Home() {
     </main>
   );
 }
-
-
-
-

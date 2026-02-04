@@ -16,28 +16,22 @@ async function seed() {
 
   await prisma.eventType.createMany({
     data: [
-      { nome: 'cultura' },
-      { nome: 'turismo' },
-      { nome: 'gastronomia' },
-      { nome: 'festividade' },
-      { nome: 'aventura' },
+      { nome: 'Cultura' },
+      { nome: 'Turismo' },
+      { nome: 'Gastronomia' },
+      { nome: 'Festividade' },
+      { nome: 'Aventura' },
     ],
     skipDuplicates: true,
   });
   const eventTypes = await prisma.eventType.findMany();
   const eventTypeMap = eventTypes.reduce(
-    (acc, type) => {
+    (acc: Record<string, number>, type: { id: number; nome: string }) => {
       acc[type.nome.toLowerCase()] = type.id;
       return acc;
     },
     {} as Record<string, number>
   );
-
-  await prisma.event.deleteMany({
-    where: {
-      nome: { not: { contains: '2026' } },
-    },
-  });
 
   // Criar usuário administrador
   const adminUser = await prisma.user.upsert({
@@ -76,6 +70,49 @@ async function seed() {
       email: 'gestor2@teste.com',
       password: bcrypt.hashSync('123456', 10),
       typeId: 2,
+    },
+  });
+
+  // Criar usuários turistas para testar vendas
+  const turista1 = await prisma.user.upsert({
+    where: { email: 'turista1@teste.com' },
+    update: {},
+    create: {
+      name: 'Maria Silva',
+      email: 'turista1@teste.com',
+      password: bcrypt.hashSync('123456', 10),
+      typeId: 4,
+      isVerified: true,
+      verificationToken: null,
+      verificationExpires: null,
+    },
+  });
+
+  const turista2 = await prisma.user.upsert({
+    where: { email: 'turista2@teste.com' },
+    update: {},
+    create: {
+      name: 'João Santos',
+      email: 'turista2@teste.com',
+      password: bcrypt.hashSync('123456', 10),
+      typeId: 4,
+      isVerified: true,
+      verificationToken: null,
+      verificationExpires: null,
+    },
+  });
+
+  const turista3 = await prisma.user.upsert({
+    where: { email: 'turista3@teste.com' },
+    update: {},
+    create: {
+      name: 'Ana Costa',
+      email: 'turista3@teste.com',
+      password: bcrypt.hashSync('123456', 10),
+      typeId: 4,
+      isVerified: true,
+      verificationToken: null,
+      verificationExpires: null,
     },
   });
 
@@ -1037,11 +1074,425 @@ async function seed() {
       relatedLinks: [],
     },
   });
+
+  // --- Lotes de Ingressos (TicketLots) ---
+
+  // Buscar eventos para criar lotes
+  const parintins = await prisma.event.findUnique({
+    where: { nome: 'Festival Folclórico de Parintins 2026' },
+  });
+  const cirandas = await prisma.event.findUnique({
+    where: { nome: 'Festival de Cirandas de Manacapuru 2026' },
+  });
+  const festGuarana = await prisma.event.findUnique({
+    where: { nome: 'Festa do Guaraná 2026' },
+  });
+  const amazonasOpera = await prisma.event.findUnique({
+    where: { nome: 'Festival Amazonas de Ópera 2026' },
+  });
+  const manausPasso = await prisma.event.findUnique({
+    where: { nome: 'Manaus Passo a Paço 2026' },
+  });
+  const jungleMarathon = await prisma.event.findUnique({
+    where: { nome: 'Jungle Marathon 2026' },
+  });
+
+  // Lotes para Festival de Parintins
+  let lote1Parintins, lote2Parintins, lote3Parintins;
+  if (parintins) {
+    lote1Parintins = await prisma.ticketLot.create({
+      data: {
+        name: '1º Lote - Arquibancada',
+        price: 150.0,
+        quantity: 1000,
+        active: false, // Já esgotado
+        maxPerUser: 4,
+        eventId: parintins.id,
+      },
+    });
+
+    lote2Parintins = await prisma.ticketLot.create({
+      data: {
+        name: '2º Lote - Arquibancada',
+        price: 200.0,
+        quantity: 800,
+        active: false, // Já esgotado
+        maxPerUser: 4,
+        eventId: parintins.id,
+      },
+    });
+
+    lote3Parintins = await prisma.ticketLot.create({
+      data: {
+        name: '3º Lote - Arquibancada',
+        price: 250.0,
+        quantity: 500,
+        active: true,
+        maxPerUser: 4,
+        eventId: parintins.id,
+      },
+    });
+
+    await prisma.ticketLot.create({
+      data: {
+        name: 'VIP - Camarote',
+        price: 600.0,
+        quantity: 200,
+        active: true,
+        maxPerUser: 2,
+        eventId: parintins.id,
+      },
+    });
+  }
+
+  // Lotes para Festival de Cirandas
+  let loteCirandas1, loteCirandas2;
+  if (cirandas) {
+    loteCirandas1 = await prisma.ticketLot.create({
+      data: {
+        name: '1º Lote - Entrada Geral',
+        price: 80.0,
+        quantity: 500,
+        active: false,
+        maxPerUser: 5,
+        eventId: cirandas.id,
+      },
+    });
+
+    loteCirandas2 = await prisma.ticketLot.create({
+      data: {
+        name: '2º Lote - Entrada Geral',
+        price: 100.0,
+        quantity: 400,
+        active: true,
+        maxPerUser: 5,
+        eventId: cirandas.id,
+      },
+    });
+  }
+
+  // Lotes para Festa do Guaraná
+  let loteGuarana1;
+  if (festGuarana) {
+    loteGuarana1 = await prisma.ticketLot.create({
+      data: {
+        name: 'Ingresso Único',
+        price: 50.0,
+        quantity: 1500,
+        active: true,
+        maxPerUser: 6,
+        eventId: festGuarana.id,
+      },
+    });
+
+    await prisma.ticketLot.create({
+      data: {
+        name: 'Ingresso Família (4 pessoas)',
+        price: 180.0,
+        quantity: 200,
+        active: true,
+        maxPerUser: 2,
+        eventId: festGuarana.id,
+      },
+    });
+  }
+
+  // Lotes para Festival Amazonas de Ópera
+  let loteOpera1, loteOpera2;
+  if (amazonasOpera) {
+    loteOpera1 = await prisma.ticketLot.create({
+      data: {
+        name: 'Plateia',
+        price: 350.0,
+        quantity: 300,
+        active: true,
+        maxPerUser: 3,
+        eventId: amazonasOpera.id,
+      },
+    });
+
+    loteOpera2 = await prisma.ticketLot.create({
+      data: {
+        name: 'Balcão Nobre',
+        price: 500.0,
+        quantity: 150,
+        active: true,
+        maxPerUser: 2,
+        eventId: amazonasOpera.id,
+      },
+    });
+  }
+
+  // Lotes para Manaus Passo a Paço
+  let lotePasso1;
+  if (manausPasso) {
+    lotePasso1 = await prisma.ticketLot.create({
+      data: {
+        name: 'Acesso Livre',
+        price: 0.0, // Evento gratuito
+        quantity: 5000,
+        active: true,
+        maxPerUser: 10,
+        eventId: manausPasso.id,
+      },
+    });
+  }
+
+  // Lotes para Jungle Marathon
+  let loteMarathon1;
+  if (jungleMarathon) {
+    loteMarathon1 = await prisma.ticketLot.create({
+      data: {
+        name: 'Inscrição Atleta',
+        price: 1200.0,
+        quantity: 100,
+        active: true,
+        maxPerUser: 1,
+        eventId: jungleMarathon.id,
+      },
+    });
+  }
+
+  // --- Vendas de Ingressos (Orders) ---
+
+  // Venda 1: turista1 compra ingressos do Parintins (1º lote)
+  if (parintins && lote1Parintins) {
+    const order1 = await prisma.order.create({
+      data: {
+        userId: turista1.id,
+        eventId: parintins.id,
+        status: 'confirmed',
+        createdAt: new Date('2025-12-15T14:30:00Z'),
+      },
+    });
+
+    await prisma.orderItem.create({
+      data: {
+        orderId: order1.id,
+        ticketLotId: lote1Parintins.id,
+        quantity: 2,
+        price: lote1Parintins.price,
+      },
+    });
+  }
+
+  // Venda 2: turista2 compra ingressos do Parintins (2º lote)
+  if (parintins && lote2Parintins) {
+    const order2 = await prisma.order.create({
+      data: {
+        userId: turista2.id,
+        eventId: parintins.id,
+        status: 'confirmed',
+        createdAt: new Date('2026-01-10T09:15:00Z'),
+      },
+    });
+
+    await prisma.orderItem.create({
+      data: {
+        orderId: order2.id,
+        ticketLotId: lote2Parintins.id,
+        quantity: 4,
+        price: lote2Parintins.price,
+      },
+    });
+  }
+
+  // Venda 3: turista3 compra ingressos do Parintins (3º lote)
+  if (parintins && lote3Parintins) {
+    const order3 = await prisma.order.create({
+      data: {
+        userId: turista3.id,
+        eventId: parintins.id,
+        status: 'confirmed',
+        createdAt: new Date('2026-01-25T16:45:00Z'),
+      },
+    });
+
+    await prisma.orderItem.create({
+      data: {
+        orderId: order3.id,
+        ticketLotId: lote3Parintins.id,
+        quantity: 3,
+        price: lote3Parintins.price,
+      },
+    });
+  }
+
+  // Venda 4: turista1 compra ingressos do Festival de Cirandas
+  if (cirandas && loteCirandas1) {
+    const order4 = await prisma.order.create({
+      data: {
+        userId: turista1.id,
+        eventId: cirandas.id,
+        status: 'confirmed',
+        createdAt: new Date('2026-01-05T11:20:00Z'),
+      },
+    });
+
+    await prisma.orderItem.create({
+      data: {
+        orderId: order4.id,
+        ticketLotId: loteCirandas1.id,
+        quantity: 5,
+        price: loteCirandas1.price,
+      },
+    });
+  }
+
+  // Venda 5: turista2 compra ingresso da Festa do Guaraná
+  if (festGuarana && loteGuarana1) {
+    const order5 = await prisma.order.create({
+      data: {
+        userId: turista2.id,
+        eventId: festGuarana.id,
+        status: 'confirmed',
+        createdAt: new Date('2026-01-15T18:30:00Z'),
+      },
+    });
+
+    await prisma.orderItem.create({
+      data: {
+        orderId: order5.id,
+        ticketLotId: loteGuarana1.id,
+        quantity: 3,
+        price: loteGuarana1.price,
+      },
+    });
+  }
+
+  // Venda 6: turista3 compra ingressos da Ópera
+  if (amazonasOpera && loteOpera1 && loteOpera2) {
+    const order6 = await prisma.order.create({
+      data: {
+        userId: turista3.id,
+        eventId: amazonasOpera.id,
+        status: 'confirmed',
+        createdAt: new Date('2026-01-20T10:00:00Z'),
+      },
+    });
+
+    await prisma.orderItem.create({
+      data: {
+        orderId: order6.id,
+        ticketLotId: loteOpera1.id,
+        quantity: 2,
+        price: loteOpera1.price,
+      },
+    });
+
+    await prisma.orderItem.create({
+      data: {
+        orderId: order6.id,
+        ticketLotId: loteOpera2.id,
+        quantity: 1,
+        price: loteOpera2.price,
+      },
+    });
+  }
+
+  // Venda 7: turista1 compra ingresso gratuito do Manaus Passo a Paço
+  if (manausPasso && lotePasso1) {
+    const order7 = await prisma.order.create({
+      data: {
+        userId: turista1.id,
+        eventId: manausPasso.id,
+        status: 'confirmed',
+        createdAt: new Date('2026-01-12T14:00:00Z'),
+      },
+    });
+
+    await prisma.orderItem.create({
+      data: {
+        orderId: order7.id,
+        ticketLotId: lotePasso1.id,
+        quantity: 4,
+        price: lotePasso1.price,
+      },
+    });
+  }
+
+  // Venda 8: turista2 compra inscrição Jungle Marathon
+  if (jungleMarathon && loteMarathon1) {
+    const order8 = await prisma.order.create({
+      data: {
+        userId: turista2.id,
+        eventId: jungleMarathon.id,
+        status: 'confirmed',
+        createdAt: new Date('2026-01-08T08:45:00Z'),
+      },
+    });
+
+    await prisma.orderItem.create({
+      data: {
+        orderId: order8.id,
+        ticketLotId: loteMarathon1.id,
+        quantity: 1,
+        price: loteMarathon1.price,
+      },
+    });
+  }
+
+  // Venda 9: turista3 compra mais ingressos do Festival de Cirandas (2º lote)
+  if (cirandas && loteCirandas2) {
+    const order9 = await prisma.order.create({
+      data: {
+        userId: turista3.id,
+        eventId: cirandas.id,
+        status: 'pending',
+        createdAt: new Date('2026-01-30T19:22:00Z'),
+      },
+    });
+
+    await prisma.orderItem.create({
+      data: {
+        orderId: order9.id,
+        ticketLotId: loteCirandas2.id,
+        quantity: 2,
+        price: loteCirandas2.price,
+      },
+    });
+  }
+
+  // Venda 10: turista1 compra ingresso família da Festa do Guaraná
+  if (festGuarana) {
+    const loteGuaranaFamilia = await prisma.ticketLot.findFirst({
+      where: {
+        eventId: festGuarana.id,
+        name: 'Ingresso Família (4 pessoas)',
+      },
+    });
+
+    if (loteGuaranaFamilia) {
+      const order10 = await prisma.order.create({
+        data: {
+          userId: turista1.id,
+          eventId: festGuarana.id,
+          status: 'confirmed',
+          createdAt: new Date('2026-01-28T12:10:00Z'),
+        },
+      });
+
+      await prisma.orderItem.create({
+        data: {
+          orderId: order10.id,
+          ticketLotId: loteGuaranaFamilia.id,
+          quantity: 1,
+          price: loteGuaranaFamilia.price,
+        },
+      });
+    }
+  }
+
   console.log('Seed executado com sucesso!');
   console.log(`Admin: ${adminUser.email}`);
   console.log(`Usuário 1: ${gestorUser.email}`);
   console.log(`Usuário 2: ${gestorUser2.email}`);
+  console.log(`Turista 1: ${turista1.email}`);
+  console.log(`Turista 2: ${turista2.email}`);
+  console.log(`Turista 3: ${turista3.email}`);
   console.log(`Eventos criados para ambos usuários`);
+  console.log(`Lotes de ingressos criados para vários eventos`);
+  console.log(`Vendas de ingressos criadas para os turistas`);
 }
 
 seed()

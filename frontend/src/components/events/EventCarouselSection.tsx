@@ -8,6 +8,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { useEffect, useMemo, useState } from 'react';
+import { API_URL } from '@/config/api';
 
 type ApiEvent = {
   id: string;
@@ -24,7 +25,7 @@ type Props = {
 };
 
 function apiBaseUrl() {
-  return 'http://localhost:3001';
+  return API_URL;
 }
 
 const fallbackImages = ['/icons/event-placeholder.svg'];

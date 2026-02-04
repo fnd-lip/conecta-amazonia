@@ -74,13 +74,20 @@ export class EventRepository {
       },
     });
 
-    return events.map((event) => mapEventCategory(event));
+    return events.map((event: any) => mapEventCategory(event));
   }
 
   async findById(id: string) {
     const event = await prisma.event.findUnique({
       where: { id },
-      include: { eventType: true, children: { include: { eventType: true } } },
+      include: {
+        eventType: true,
+        children: { include: { eventType: true } },
+        ticketLots: {
+          where: { active: true },
+          orderBy: { price: 'asc' },
+        },
+      },
     });
 
     return mapEventCategory(event);
@@ -143,7 +150,7 @@ export class EventRepository {
       },
     });
 
-    return events.map((event) => mapEventCategory(event));
+    return events.map((event: any) => mapEventCategory(event));
   }
 
   async findAllWithFilters(filters: any, limit: number = 50) {
@@ -168,7 +175,7 @@ export class EventRepository {
       },
     });
 
-    return events.map((event) => mapEventCategory(event));
+    return events.map((event: any) => mapEventCategory(event));
   }
 
   async findPublicByDateRange(startDate: Date, endDate: Date) {
@@ -184,7 +191,7 @@ export class EventRepository {
       include: { eventType: true },
     });
 
-    return events.map((event) => mapEventCategory(event));
+    return events.map((event: any) => mapEventCategory(event));
   }
 
   async findBySearchTerm(term: string, limit: number = 10) {
@@ -210,6 +217,156 @@ export class EventRepository {
       },
     });
 
-    return events.map((event) => mapEventCategory(event));
+    return events.map((event: any) => mapEventCategory(event));
+  }
+
+  async getEventStatistics(eventId: string) {
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        eventType: true,
+        ticketLots: true,
+        orders: {
+          where: {
+            status: 'confirmed',
+          },
+          include: {
+            items: true,
+            validations: true,
+          },
+        },
+      },
+    });
+
+    if (!event) {
+      return null;
+    }
+
+    // Calcular estatísticas
+    let totalTicketsSold = 0;
+    let totalRevenue = 0;
+    let ticketsValidated = 0;
+
+    // Contar tickets vendidos e receita total dos pedidos confirmados
+    event.orders.forEach((order: any) => {
+      order.items.forEach((item: any) => {
+        totalTicketsSold += item.quantity;
+        totalRevenue += item.price * item.quantity;
+      });
+
+      if (order.validations && order.validations.length > 0) {
+        ticketsValidated++;
+      }
+    });
+
+    // Processar lotes e calcular totais
+    const ticketLots = event.ticketLots.map((lot: any) => {
+      // Calcular vendidos por lote
+      const soldInLot = event.orders.reduce((acc: number, order: any) => {
+        const itemsInLot = order.items.filter(
+          (item: any) => item.ticketLotId === lot.id
+        );
+        return (
+          acc +
+          itemsInLot.reduce((sum: number, item: any) => sum + item.quantity, 0)
+        );
+      }, 0);
+
+      // lot.quantity já representa os ingressos restantes (foi decrementado na compra)
+      const remainingInLot = lot.active ? lot.quantity : 0;
+      const totalInLot = remainingInLot + soldInLot;
+
+      return {
+        id: lot.id,
+        name: lot.name,
+        price: lot.price,
+        quantity: totalInLot, // Total original
+        sold: soldInLot,
+        remaining: remainingInLot,
+        active: lot.active,
+      };
+    });
+
+    // Calcular totais baseado nos lotes
+    const totalTicketsAvailable = ticketLots.reduce(
+      (sum: number, lot: any) => sum + lot.quantity,
+      0
+    );
+    const ticketsRemaining = ticketLots.reduce(
+      (sum: number, lot: any) => sum + lot.remaining,
+      0
+    );
+
+    return {
+      eventId: event.id,
+      eventName: event.nome,
+      eventDate: event.data,
+      eventType: event.eventType.nome,
+      totalTicketsAvailable,
+      totalTicketsSold,
+      ticketsRemaining,
+      ticketsValidated,
+      totalRevenue,
+      totalOrders: event.orders.length,
+      ticketLots,
+    };
+  }
+
+  async getDailySales(eventId: string) {
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        orders: {
+          where: {
+            status: 'confirmed',
+          },
+          include: {
+            items: true,
+          },
+          orderBy: {
+            createdAt: 'asc',
+          },
+        },
+      },
+    });
+
+    if (!event) {
+      return [];
+    }
+
+    // Agrupar vendas por dia
+    const salesByDay = new Map<string, { tickets: number; revenue: number }>();
+
+    event.orders.forEach((order: any) => {
+      const date = new Date(order.createdAt);
+      const dateKey = date.toISOString().split('T')[0]!; // YYYY-MM-DD
+
+      if (!salesByDay.has(dateKey)) {
+        salesByDay.set(dateKey, { tickets: 0, revenue: 0 });
+      }
+
+      const dayData = salesByDay.get(dateKey)!;
+
+      order.items.forEach((item: any) => {
+        dayData.tickets += item.quantity;
+        dayData.revenue += item.price * item.quantity;
+      });
+    });
+
+    // Converter para array e adicionar acumulado
+    let accumulated = 0;
+    const dailySales = Array.from(salesByDay.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, data]) => {
+        accumulated += data.tickets;
+        return {
+          date,
+          tickets: data.tickets,
+          revenue: data.revenue,
+          accumulated,
+        };
+      });
+
+    return dailySales;
   }
 }

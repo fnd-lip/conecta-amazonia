@@ -55,7 +55,7 @@ export function isAdmin(): boolean {
 }
 
 export function isGestor(): boolean {
-  return hasRole('GESTOR');
+  return hasRole('GESTOR') || hasRole('GESTOR LOCAL');
 }
 
 export function isTurista(): boolean {

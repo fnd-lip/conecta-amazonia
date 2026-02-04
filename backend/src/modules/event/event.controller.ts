@@ -272,8 +272,56 @@ class EventController {
       return res.json(events);
     } catch (err: any) {}
   }
+
+  async getStatistics(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const userId = (req as any).user.id;
+
+      if (!id) {
+        return res.status(400).json({ error: 'ID é obrigatório' });
+      }
+
+      const statistics = await eventService.getEventStatistics(id, userId);
+
+      if (!statistics) {
+        return res.status(404).json({ message: 'Evento não encontrado!' });
+      }
+
+      return res.json(statistics);
+    } catch (error: any) {
+      logger.error('Error getting event statistics:', error);
+      if (error.message.includes('permissão')) {
+        return res.status(403).json({ message: error.message });
+      }
+      return res
+        .status(500)
+        .json({ message: error.message || 'Erro ao buscar estatísticas.' });
+    }
+  }
+
+  async getDailySales(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const userId = (req as any).user.id;
+
+      if (!id) {
+        return res.status(400).json({ error: 'ID é obrigatório' });
+      }
+
+      const dailySales = await eventService.getDailySales(id, userId);
+
+      return res.json({ dailySales });
+    } catch (error: any) {
+      logger.error('Error getting daily sales:', error);
+      if (error.message.includes('permissão')) {
+        return res.status(403).json({ message: error.message });
+      }
+      return res
+        .status(500)
+        .json({ message: error.message || 'Erro ao buscar vendas diárias.' });
+    }
+  }
 }
 
 export default new EventController();
-
-

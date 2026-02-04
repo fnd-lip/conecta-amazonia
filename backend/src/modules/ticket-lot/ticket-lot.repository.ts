@@ -14,6 +14,7 @@ export class TicketLotRepository {
     quantity: number;
     eventId: string;
     active?: boolean;
+    maxPerUser?: number | null;
   }) {
     return prisma.ticketLot.create({
       data: {
@@ -22,6 +23,7 @@ export class TicketLotRepository {
         quantity: data.quantity,
         eventId: data.eventId,
         active: data.active ?? true,
+        maxPerUser: data.maxPerUser ?? null,
       },
     });
   }
@@ -33,6 +35,7 @@ export class TicketLotRepository {
       price: number;
       quantity: number;
       active: boolean;
+      maxPerUser: number | null;
     }>
   ) {
     return prisma.ticketLot.update({

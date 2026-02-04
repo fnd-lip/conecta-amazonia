@@ -29,6 +29,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: 'False'
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+      
     ports:
       - "8080:80"
     volumes:
@@ -39,6 +40,14 @@ services:
     networks:
       - conecta-amazonia-network
   
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: conecta-amazonia-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - conecta-amazonia-network
   backend:
     build:
       context: ./backend
@@ -51,9 +60,22 @@ services:
       NODE_ENV: production
       JWT_SECRET: 123456
       PORT: 3001
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.1:latest}
+      ASSISTANT_PROVIDER: ${ASSISTANT_PROVIDER:-ollama}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+      SMTP_SECURE: "false"
+      SMTP_USER: ""
+      SMTP_PASS: ""
+      FRONTEND_URL: http://localhost:3000
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - ./backend/uploads:/app/uploads
     networks:
       - conecta-amazonia-network
     restart: unless-stopped
@@ -62,6 +84,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:3001
     container_name: conecta-amazonia-frontend
     ports:
       - "3000:80"
@@ -71,9 +95,21 @@ services:
       - conecta-amazonia-network
     restart: unless-stopped
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: conecta-amazonia-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - conecta-amazonia-network
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   pgadmin_data:
+  ollama_data:
 
 networks:
   conecta-amazonia-network:

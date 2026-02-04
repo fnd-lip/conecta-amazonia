@@ -260,3 +260,114 @@
   opacity: 0.95;
   transform: translateY(-2px);
 }
+
+/* ===== Fix principal: evitar overflow horizontal no mobile ===== */
+.cal-page {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.cal-card {
+  width: 100%;
+  max-width: 980px;
+  box-sizing: border-box;
+}
+
+/* Grid não pode estourar a largura do container */
+.cal-weekdays,
+.cal-grid {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Cada célula pode encolher de verdade */
+.cal-weekday,
+.cal-cell {
+  min-width: 0;
+}
+
+/* ===== Ajustes fortes para telas pequenas (Galaxy S20 ~360px) ===== */
+@media (max-width: 420px) {
+  .cal-page {
+    padding: 10px;
+  }
+
+  .cal-card {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  /* Header mais compacto e nav encaixado */
+  .cal-header {
+    gap: 10px;
+  }
+
+  .cal-header h1 {
+    font-size: 18px;
+    line-height: 1.2;
+  }
+
+  .cal-subtitle {
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  .cal-nav {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .cal-btn {
+    padding: 8px 10px;
+    border-radius: 10px;
+  }
+
+  .cal-month {
+    font-size: 14px;
+    text-align: center;
+    flex: 1;
+  }
+
+  /* Menos espaço entre colunas/linhas */
+  .cal-weekdays,
+  .cal-grid {
+    gap: 5px;
+  }
+
+  .cal-weekday {
+    font-size: 11px;
+    padding: 4px 0;
+  }
+
+  /* Células menores e "certinhas" */
+  .cal-cell {
+    padding: 6px;
+    border-radius: 10px;
+    min-height: 0;          /* tira a altura mínima grande */
+    aspect-ratio: 1 / 1;    /* deixa quadrado (melhor no mobile) */
+  }
+
+  .cal-day {
+    font-size: 13px;
+  }
+
+  .cal-badge {
+    bottom: 6px;
+    left: 6px;
+    font-size: 10px;
+    gap: 4px;
+  }
+
+  .cal-dot {
+    width: 8px;
+    height: 8px;
+  }
+
+  /* Modal caber sempre */
+  .cal-modal {
+    max-height: calc(100vh - 24px);
+    overflow: auto;
+  }
+}

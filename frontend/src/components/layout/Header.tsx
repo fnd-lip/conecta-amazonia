@@ -14,7 +14,9 @@ import {
   CircleUser,
   LogIn,
   Menu,
+  ScanLine,
   Sparkles,
+  Ticket,
   User,
 } from 'lucide-react';
 import {
@@ -28,7 +30,7 @@ import { Avatar } from '@/components/ui/avatar';
 import AssistantChat from '../assistant/AssistantChat';
 
 import logo from '@/assets/conecta.svg';
-import { getUserInfo, isAdmin } from '../../auth-utils';
+import { getUserInfo, isAdmin, isGestor, isTurista } from '../../auth-utils';
 
 interface UserInfo {
   email: string;
@@ -59,22 +61,35 @@ const gestorLinks = [
     to: '/gestor/eventos',
     icon: CalendarCheck2,
   },
+  {
+    label: 'Validar Ingresso',
+    to: '/gestor/validar-ingresso',
+    icon: ScanLine,
+  },
 ];
 
 function MobileMenu({
   token,
   adminUser,
+  gestorUser,
+  turistaUser,
   userInfo,
   onLogout,
 }: {
   token: string | null;
   adminUser: boolean;
+  gestorUser: boolean;
+  turistaUser: boolean;
   userInfo: UserInfo | null;
   onLogout: () => void;
 }) {
   const closeSheet = () => document.dispatchEvent(new Event('sheet-close'));
 
-  const links = [...(adminUser ? adminLinks : gestorLinks), ...commonLinks];
+  const links = [
+    ...(adminUser ? adminLinks : []),
+    ...(gestorUser ? gestorLinks : []),
+    ...commonLinks,
+  ];
 
   return (
     <Sheet modal={false}>
@@ -99,6 +114,28 @@ function MobileMenu({
 
         {/* Navegação */}
         <nav className="flex-1 px-4 py-6 space-y-2">
+          {token && turistaUser && (
+            <Link to="/perfil" onClick={closeSheet}>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 text-base"
+              >
+                <User className="h-5 w-5" />
+                Meu Perfil
+              </Button>
+            </Link>
+          )}
+          {token && (
+            <Link to="/meus-ingressos" onClick={closeSheet}>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 text-base"
+              >
+                <Ticket className="h-5 w-5" />
+                Meus Ingressos
+              </Button>
+            </Link>
+          )}
           {links.map(({ label, to, icon: Icon }) => (
             <Link key={to} to={to} onClick={closeSheet}>
               <Button
@@ -160,6 +197,8 @@ export default function Header() {
   const token = localStorage.getItem('token');
   const userInfo = getUserInfo() as UserInfo | null;
   const adminUser = isAdmin();
+  const gestorUser = isGestor();
+  const turistaUser = isTurista();
   const [assistantOpen, setAssistantOpen] = useState(false);
 
   function handleLogout() {
@@ -193,11 +232,18 @@ export default function Header() {
                 Painel Administrativo
               </Button>
             </Link>
-          ) : (
+          ) : gestorUser ? (
             <Link to="/gestor/eventos">
               <Button variant="ghost" size="sm">
                 <CalendarCheck2 className="mr-1 h-4 w-4" />
                 Meus Eventos
+              </Button>
+            </Link>
+          ) : (
+            <Link to="/meus-ingressos">
+              <Button variant="ghost" size="sm">
+                <Ticket className="mr-1 h-4 w-4" />
+                Meus Ingressos
               </Button>
             </Link>
           )}
@@ -239,20 +285,46 @@ export default function Header() {
                   </div>
                   <DropdownMenuSeparator />
 
-                  {adminUser ? (
+                  {turistaUser && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/perfil">
+                        <User className="mr-2 h-4 w-4" />
+                        Meu Perfil
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+
+                  <DropdownMenuItem asChild>
+                    <Link to="/meus-ingressos">
+                      <Ticket className="mr-2 h-4 w-4" />
+                      Meus Ingressos
+                    </Link>
+                  </DropdownMenuItem>
+
+                  {adminUser && (
                     <DropdownMenuItem asChild>
                       <Link to="/admin">
                         <User className="mr-2 h-4 w-4" />
                         Painel Administrativo
                       </Link>
                     </DropdownMenuItem>
-                  ) : (
-                    <DropdownMenuItem asChild>
-                      <Link to="/gestor/eventos">
-                        <CalendarCheck2 className="mr-2 h-4 w-4" />
-                        Meus Eventos
-                      </Link>
-                    </DropdownMenuItem>
+                  )}
+
+                  {gestorUser && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link to="/gestor/eventos">
+                          <CalendarCheck2 className="mr-2 h-4 w-4" />
+                          Meus Eventos
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/gestor/validar-ingresso">
+                          <ScanLine className="mr-2 h-4 w-4" />
+                          Validar Ingresso
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
                   )}
                 </>
               )}
@@ -290,6 +362,8 @@ export default function Header() {
           <MobileMenu
             token={token}
             adminUser={adminUser}
+            gestorUser={gestorUser}
+            turistaUser={turistaUser}
             userInfo={userInfo}
             onLogout={handleLogout}
           />

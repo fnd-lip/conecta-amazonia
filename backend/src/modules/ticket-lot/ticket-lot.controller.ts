@@ -19,14 +19,14 @@ export class TicketLotController {
   async createLot(req: Request, res: Response) {
     try {
       const { eventId } = req.params;
-      const { name, price, quantity, active } = req.body;
+      const { name, price, quantity, active, maxPerUser } = req.body;
       const user = (req as any).user;
       if (!eventId) {
         return res.status(400).json({ error: 'eventId é obrigatório' });
       }
       const lot = await ticketLotService.createLot(
         eventId,
-        { name, price, quantity, active },
+        { name, price, quantity, active, maxPerUser },
         user
       );
       return res.status(201).json(lot);
@@ -39,13 +39,13 @@ export class TicketLotController {
     try {
       const { lotId } = req.params;
       const user = (req as any).user;
-      const { name, price, quantity, active } = req.body;
+      const { name, price, quantity, active, maxPerUser } = req.body;
       if (!lotId) {
         return res.status(400).json({ error: 'lotId é obrigatório' });
       }
       const updated = await ticketLotService.updateLot(
         lotId,
-        { name, price, quantity, active },
+        { name, price, quantity, active, maxPerUser },
         user
       );
       return res.status(200).json(updated);

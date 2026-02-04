@@ -184,4 +184,38 @@ export class EventService {
 
     return this.eventRepository.findBySearchTerm(term, 10);
   }
+
+  async getEventStatistics(eventId: string, userId: string) {
+    const event = await this.eventRepository.findById(eventId);
+
+    if (!event) {
+      throw new Error('Evento não encontrado!');
+    }
+
+    // Verificar se o usuário é o dono do evento
+    if (event.userId !== userId) {
+      throw new Error(
+        'Você não tem permissão para visualizar as estatísticas deste evento!'
+      );
+    }
+
+    return this.eventRepository.getEventStatistics(eventId);
+  }
+
+  async getDailySales(eventId: string, userId: string) {
+    const event = await this.eventRepository.findById(eventId);
+
+    if (!event) {
+      throw new Error('Evento não encontrado!');
+    }
+
+    // Verificar se o usuário é o dono do evento
+    if (event.userId !== userId) {
+      throw new Error(
+        'Você não tem permissão para visualizar as vendas deste evento!'
+      );
+    }
+
+    return this.eventRepository.getDailySales(eventId);
+  }
 }

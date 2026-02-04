@@ -1,11 +1,15 @@
 FROM node:24 AS builder
 WORKDIR /app
 
+# Argumento para a URL da API
+ARG VITE_API_URL=http://localhost:3001
+
 COPY package*.json ./
 RUN npm install
 
 COPY . .
-RUN npm run build
+# Build com a variável de ambiente
+RUN VITE_API_URL=${VITE_API_URL} npm run build
 
 #Nginx
 FROM nginx:stable

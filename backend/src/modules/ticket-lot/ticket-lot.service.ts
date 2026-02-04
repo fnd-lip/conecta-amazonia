@@ -25,6 +25,7 @@ export class TicketLotService {
       price: number;
       quantity: number;
       active?: boolean;
+      maxPerUser?: number | null;
     },
     user: { id: string; type: string }
   ) {
@@ -37,7 +38,7 @@ export class TicketLotService {
       isNaN(lotData.price) ||
       lotData.price < 0
     ) {
-      throw new Error('Preço deve ser maior ou igual a 0');
+      throw new Error('Preço deve ser maior ou igual a 0 (pode ser gratuito)');
     }
     if (
       lotData.quantity === undefined ||
@@ -45,6 +46,13 @@ export class TicketLotService {
       lotData.quantity < 0
     ) {
       throw new Error('Quantidade deve ser maior ou igual a 0');
+    }
+    if (
+      lotData.maxPerUser !== undefined &&
+      lotData.maxPerUser !== null &&
+      (isNaN(lotData.maxPerUser) || lotData.maxPerUser < 1)
+    ) {
+      throw new Error('Limite por usuário deve ser maior ou igual a 1');
     }
     const event = await this.eventRepository.findById(eventId);
     if (!event) throw new Error('Evento não encontrado');
@@ -65,6 +73,7 @@ export class TicketLotService {
       price: number;
       quantity: number;
       active: boolean;
+      maxPerUser: number | null;
     }>,
     user: { id: string; type: string }
   ) {
@@ -88,6 +97,13 @@ export class TicketLotService {
       (isNaN(data.quantity) || data.quantity < 0)
     ) {
       throw new Error('Quantidade deve ser maior ou igual a 0');
+    }
+    if (
+      data.maxPerUser !== undefined &&
+      data.maxPerUser !== null &&
+      (isNaN(data.maxPerUser) || data.maxPerUser < 1)
+    ) {
+      throw new Error('Limite por usuário deve ser maior ou igual a 1');
     }
     return this.ticketLotRepository.updateLot(lotId, data);
   }

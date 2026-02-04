@@ -257,6 +257,12 @@ router.get('/search', eventController.search);
 router.get('/calendar', (req, res) =>
   eventController.getPublicCalendar(req, res)
 );
+router.get('/:id/statistics', authMiddleware, (req, res) =>
+  eventController.getStatistics(req, res)
+);
+router.get('/:id/daily-sales', authMiddleware, (req, res) =>
+  eventController.getDailySales(req, res)
+);
 router.put('/:id', authMiddleware, upload.single('logo'), (req, res) =>
   eventController.update(req, res)
 );

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import EventCard from '../card/EventCard';
 import './EventCardsCarouselSection.css';
+import { API_URL } from '@/config/api';
 
 type ApiEvent = {
   id: string;
@@ -26,7 +27,7 @@ type Props = {
 const fallbackImages = ['/icons/event-placeholder.svg'];
 
 function apiBaseUrl() {
-  return 'http://localhost:3001';
+  return API_URL;
 }
 
 function formatDatePtBR(dateString?: string) {

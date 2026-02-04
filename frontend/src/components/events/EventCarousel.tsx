@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { API_URL } from '@/config/api';
 
 interface CarouselEvent {
   id: string;
@@ -17,7 +18,7 @@ interface Props {
 
 const fallbackImages = ['/icons/event-placeholder.svg'];
 
-const apiBaseUrl = () => 'http://localhost:3001';
+const apiBaseUrl = () => API_URL;
 
 const resolveImageUrl = (url: string) =>
   url.startsWith('http') ? url : `${apiBaseUrl()}${url}`;
