@@ -108,9 +108,14 @@ class AuthService {
       };
     }
 
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      throw { status: 500, message: 'JWT_SECRET não definido no ambiente' };
+    }
+
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.type.label },
-      process.env.JWT_SECRET!,
+      secret,
       { expiresIn: '2h' }
     );
 
