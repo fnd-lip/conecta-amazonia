@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Send, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { API_URL } from '@/config/api';
 import './AssistantChat.css';
 
 type ChatMessage = {
@@ -159,7 +160,7 @@ export default function AssistantChat({ open, onClose }: AssistantChatProps) {
 
     const fallbackAsk = async () => {
       try {
-        const response = await fetch('/api/assistant/ask', {
+        const response = await fetch(`${API_URL}/assistant/ask`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: text, firstMessage: isFirstMessage }),
@@ -182,7 +183,7 @@ export default function AssistantChat({ open, onClose }: AssistantChatProps) {
     };
 
     try {
-      const response = await fetch('/api/assistant/stream', {
+      const response = await fetch(`${API_URL}/assistant/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text, firstMessage: isFirstMessage }),
