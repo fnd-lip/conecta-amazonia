@@ -54,7 +54,9 @@ export default function AssistantChat({ open, onClose }: AssistantChatProps) {
       if (match.index > lastIndex) {
         parts.push(text.slice(lastIndex, match.index));
       }
-      parts.push(<strong key={`${match.index}-${match[1]}`}>{match[1]}</strong>);
+      parts.push(
+        <strong key={`${match.index}-${match[1]}`}>{match[1]}</strong>
+      );
       lastIndex = match.index + match[0].length;
     }
 
@@ -90,9 +92,7 @@ export default function AssistantChat({ open, onClose }: AssistantChatProps) {
 
       if (trimmed.startsWith('- ')) {
         const itemText = trimmed.slice(2);
-        listItems.push(
-          <li key={`item-${index}`}>{renderInline(itemText)}</li>
-        );
+        listItems.push(<li key={`item-${index}`}>{renderInline(itemText)}</li>);
         return;
       }
 
@@ -141,7 +141,9 @@ export default function AssistantChat({ open, onClose }: AssistantChatProps) {
     const typeReply = (content: string) => {
       stopTyping();
       if (!content) {
-        updateAssistantContent('Nao consegui responder agora. Tente novamente.');
+        updateAssistantContent(
+          'Nao consegui responder agora. Tente novamente.'
+        );
         return;
       }
 
@@ -171,11 +173,29 @@ export default function AssistantChat({ open, onClose }: AssistantChatProps) {
           typeReply('Nao consegui responder agora. Tente novamente.');
           return;
         }
-        const data = await response.json();
+        const raw = await response.text();
+
+        if (!raw) {
+          console.error('Assistente fallback: resposta vazia', response.status);
+          typeReply('Nao consegui responder agora. Tente novamente.');
+          return;
+        }
+        let data: any;
+        try {
+          data = JSON.parse(raw);
+        } catch {
+          console.error('Assistente fallback: resposta não-JSON:', raw);
+          typeReply('Nao consegui responder agora. Tente novamente.');
+          return;
+        }
+
         if (Array.isArray(data?.events)) {
           setRecommended(data.events);
         }
-        typeReply(data?.reply || 'Nao consegui responder agora. Tente novamente.');
+
+        typeReply(
+          data?.reply || 'Nao consegui responder agora. Tente novamente.'
+        );
       } catch (error) {
         console.error('Assistente fallback erro geral:', error);
         typeReply('Nao consegui responder agora. Tente novamente.');
@@ -258,7 +278,10 @@ export default function AssistantChat({ open, onClose }: AssistantChatProps) {
           }
 
           try {
-            const payload = JSON.parse(data) as { delta?: string; error?: string };
+            const payload = JSON.parse(data) as {
+              delta?: string;
+              error?: string;
+            };
             if (payload.error) {
               console.error('Assistente erro stream:', payload.error);
               throw new Error(payload.error);
@@ -271,7 +294,9 @@ export default function AssistantChat({ open, onClose }: AssistantChatProps) {
             }
           } catch (parseError) {
             console.error('Assistente erro parse:', parseError);
-            setAssistantError('Desculpe, tive um problema ao buscar recomendacoes.');
+            setAssistantError(
+              'Desculpe, tive um problema ao buscar recomendacoes.'
+            );
             throw parseError;
           }
         }
@@ -337,9 +362,7 @@ export default function AssistantChat({ open, onClose }: AssistantChatProps) {
 
       {recommended.length > 0 && (
         <div className="assistant-recommended">
-          <div className="assistant-recommended-title">
-            Eventos sugeridos
-          </div>
+          <div className="assistant-recommended-title">Eventos sugeridos</div>
           <div className="assistant-recommended-list">
             {recommended.map((event) => (
               <button
@@ -351,9 +374,8 @@ export default function AssistantChat({ open, onClose }: AssistantChatProps) {
                       detail: { id: event.id },
                     })
                   );
-                  const mapSection = document.getElementById(
-                    'events-map-section'
-                  );
+                  const mapSection =
+                    document.getElementById('events-map-section');
                   if (mapSection) {
                     mapSection.scrollIntoView({ behavior: 'smooth' });
                   }
