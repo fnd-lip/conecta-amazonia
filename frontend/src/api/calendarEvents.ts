@@ -1,3 +1,5 @@
+import { API_URL } from '../config/api';
+
 export type ApiEvent = {
   id: string;
   nome: string;
@@ -6,8 +8,13 @@ export type ApiEvent = {
   descricao?: string;
 };
 
-export async function fetchCalendarEvents(params: { startDateISO: string; endDateISO: string }) {
-  const url = `http://localhost:3001/events/calendar?start=${params.startDateISO}&end=${params.endDateISO}`;
+export async function fetchCalendarEvents(params: {
+  startDateISO: string;
+  endDateISO: string;
+}) {
+  const url = `${API_URL}/events/calendar?start=${encodeURIComponent(
+    params.startDateISO
+  )}&end=${encodeURIComponent(params.endDateISO)}`;
 
   const res = await fetch(url);
 
@@ -17,9 +24,5 @@ export async function fetchCalendarEvents(params: { startDateISO: string; endDat
 
   const data = (await res.json()) as ApiEvent[];
 
-  if (Array.isArray(data)) {
-    return data;
-  }
-
-  return [];
+  return Array.isArray(data) ? data : [];
 }

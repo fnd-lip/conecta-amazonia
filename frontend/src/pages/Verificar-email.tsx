@@ -4,6 +4,7 @@ import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { API_URL } from '@/config/api';
 import { useRef } from 'react';
 
 export function VerifyEmailPage() {
@@ -31,7 +32,7 @@ export function VerifyEmailPage() {
     const verifyToken = async () => {
       try {
         const response = await fetch(
-          'http://localhost:3001/auth/verify-email',
+          `${API_URL}/auth/verify-email`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

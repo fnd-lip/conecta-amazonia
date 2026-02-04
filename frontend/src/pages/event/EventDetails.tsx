@@ -57,8 +57,12 @@ function formatDate(isoDate: string) {
   );
 }
 
-const resolveImageUrl = (url: string) =>
-  url.startsWith('http') ? url : `${API_URL}${url}`;
+const resolveImageUrl = (url: string) => {
+  if (url.startsWith('http')) return url;
+  const base = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
+  const path = url.startsWith('/') ? url : `/${url}`;
+  return `${base}${path}`;
+};
 
 export default function EventDetails() {
   const { id } = useParams<{ id: string }>();
