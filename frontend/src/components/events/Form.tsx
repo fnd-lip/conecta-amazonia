@@ -381,6 +381,7 @@ function Form({ onSuccess, editingEvent, onCancel }: FormProps) {
 
   return (
     <>
+      <div style={{ display: 'none' }}>FORM_VERSAO_NOVA_123</div>
       <div className="form-container">
         <h2>{isEditing ? 'Editar Evento' : 'Cadastro de Evento'}</h2>
 
@@ -589,7 +590,10 @@ function Form({ onSuccess, editingEvent, onCancel }: FormProps) {
             <button
               type="button"
               className="btn-submit"
-              onClick={handleSubmit}
+              onClick={() => {
+                console.log('[FORM] CLICK BUTTON');
+                handleSubmit();
+              }}
               disabled={loading}
             >
               {loading
