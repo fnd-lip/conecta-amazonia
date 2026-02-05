@@ -118,10 +118,32 @@ class EventController {
 
       logger.info({ eventId: id, userId }, 'Evento excluído com sucesso');
       return res.status(200).json({ message: 'Evento excluído com sucesso' });
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro interno';
+    } catch (err: any) {
+      const msg = err instanceof Error ? err.message : 'Erro interno';
       logger.error({ err }, 'Erro ao excluir evento');
-      return res.status(404).json({ error: errorMessage });
+
+      // 404 só quando realmente não existe
+      if (msg.includes('Evento nao encontrado')) {
+        return res.status(404).json({ error: msg });
+      }
+
+      // 403 quando não tem permissão
+      if (msg.includes('permissao') || msg.includes('permissão')) {
+        return res.status(403).json({ error: msg });
+      }
+      // 409 quando o banco bloqueia por FK (lotes/pedidos vinculados)
+      if (
+        err?.code === 'P2003' ||
+        msg.includes('Foreign key constraint violated')
+      ) {
+        return res.status(409).json({
+          error:
+            'Não foi possível excluir: existem registros vinculados (ex.: lotes/pedidos).',
+          detail: msg,
+        });
+      }
+      // fallback
+      return res.status(500).json({ error: msg });
     }
   }
 

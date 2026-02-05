@@ -94,12 +94,29 @@ export class EventRepository {
   }
 
   async deleteById(id: string) {
-    await prisma.event.deleteMany({
-      where: { parentId: id },
-    });
+    return prisma.$transaction(async (tx) => {
+      // Pega ids dos filhos
+      const children = await tx.event.findMany({
+        where: { parentId: id },
+        select: { id: true },
+      });
 
-    return prisma.event.delete({
-      where: { id },
+      const ids = [id, ...children.map((c) => c.id)];
+
+      // 1) Apaga os lotes (ticketLots) ligados ao evento e aos filhos
+      await tx.ticketLot.deleteMany({
+        where: { eventId: { in: ids } },
+      });
+
+      // 2) Apaga os filhos
+      await tx.event.deleteMany({
+        where: { id: { in: children.map((c) => c.id) } },
+      });
+
+      // 3) Apaga o evento pai
+      return tx.event.delete({
+        where: { id },
+      });
     });
   }
 
