@@ -273,6 +273,11 @@ function Form({ onSuccess, editingEvent, onCancel }: FormProps) {
   };
 
   async function handleSubmit() {
+    console.log('CLICK UPDATE -> handleSubmit', {
+      isEditing,
+      id: editingEvent?.id,
+      token: !!localStorage.getItem('token'),
+    });
     setLoading(true);
     setSuccess('');
     setError('');
