@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import LocationPicker from './LocationPicker';
 import TicketLotManager from './TicketLotManager';
 import { API_URL } from '@/config/api';
@@ -65,9 +65,9 @@ function Form({ onSuccess, editingEvent, onCancel }: FormProps) {
   const [eventTypesLoading, setEventTypesLoading] = useState(false);
   const [createdEventId, setCreatedEventId] = useState<string | null>(null);
   const isEditing = !!editingEvent;
+  const lastEditingIdRef = useRef<string | null>(null);
 
   const loadEventTypes = useCallback(async () => {
-    if (eventTypesLoading) return;
     setEventTypesLoading(true);
     try {
       const res = await fetch(`${API_URL}/event-types`);
@@ -78,10 +78,9 @@ function Form({ onSuccess, editingEvent, onCancel }: FormProps) {
     } finally {
       setEventTypesLoading(false);
     }
-  }, [eventTypesLoading]);
+  }, []);
 
   useEffect(() => {
-    // Buscar eventos para seleção de evento pai
     fetch(`${API_URL}/events/all`)
       .then((res) => res.json())
       .then((data) => {
@@ -96,60 +95,66 @@ function Form({ onSuccess, editingEvent, onCancel }: FormProps) {
       .catch(() => setEventosPai([]));
 
     loadEventTypes();
+  }, [loadEventTypes]);
 
-    if (editingEvent) {
-      // Ao editar, armazena o ID do evento
-      setCreatedEventId(editingEvent.id);
-      const dateForInput = new Date(editingEvent.data)
-        .toISOString()
-        .slice(0, 16);
-      Promise.resolve().then(() => {
-        setFormData((prev) => ({
-          ...prev,
-          nome: editingEvent.nome,
-          descricao: editingEvent.descricao,
-          data: dateForInput,
-          categoria: editingEvent.categoria,
-          externalLink: editingEvent.externalLink || '',
-          relatedLinks: (editingEvent.relatedLinks || []).join(', '),
-          parentId: editingEvent.parentId || '',
-          locationName: editingEvent.locationName || '',
-          latitude:
-            editingEvent.latitude !== null &&
-            editingEvent.latitude !== undefined
-              ? String(editingEvent.latitude)
-              : '',
-          longitude:
-            editingEvent.longitude !== null &&
-            editingEvent.longitude !== undefined
-              ? String(editingEvent.longitude)
-              : '',
-        }));
-        if (
-          editingEvent.latitude !== null &&
-          editingEvent.latitude !== undefined &&
-          editingEvent.longitude !== null &&
-          editingEvent.longitude !== undefined
-        ) {
-          setSelectedLocation({
-            latitude: editingEvent.latitude,
-            longitude: editingEvent.longitude,
-            locationName: editingEvent.locationName || '',
-          });
-        } else {
-          setSelectedLocation(null);
-        }
-        setLocationQuery(editingEvent.locationName || '');
-      });
+  useEffect(() => {
+    if (!editingEvent) {
+      lastEditingIdRef.current = null;
+      return;
     }
-  }, [editingEvent]);
+
+    if (lastEditingIdRef.current === editingEvent.id) return;
+    lastEditingIdRef.current = editingEvent.id;
+
+    setCreatedEventId(editingEvent.id);
+
+    const dateForInput = new Date(editingEvent.data).toISOString().slice(0, 16);
+
+    setFormData((prev) => ({
+      ...prev,
+      nome: editingEvent.nome,
+      descricao: editingEvent.descricao,
+      data: dateForInput,
+      categoria: editingEvent.categoria,
+      externalLink: editingEvent.externalLink || '',
+      relatedLinks: (editingEvent.relatedLinks || []).join(', '),
+      parentId: editingEvent.parentId || '',
+      locationName: editingEvent.locationName || '',
+      latitude:
+        editingEvent.latitude !== null && editingEvent.latitude !== undefined
+          ? String(editingEvent.latitude)
+          : '',
+      longitude:
+        editingEvent.longitude !== null && editingEvent.longitude !== undefined
+          ? String(editingEvent.longitude)
+          : '',
+    }));
+
+    if (
+      editingEvent.latitude !== null &&
+      editingEvent.latitude !== undefined &&
+      editingEvent.longitude !== null &&
+      editingEvent.longitude !== undefined
+    ) {
+      setSelectedLocation({
+        latitude: editingEvent.latitude,
+        longitude: editingEvent.longitude,
+        locationName: editingEvent.locationName || '',
+      });
+    } else {
+      setSelectedLocation(null);
+    }
+
+    setLocationQuery(editingEvent.locationName || '');
+  }, [editingEvent?.id]);
 
   function handleChange(
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -273,6 +278,11 @@ function Form({ onSuccess, editingEvent, onCancel }: FormProps) {
     setError('');
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Sessão expirada. Faça login novamente.');
+        setLoading(false);
+        return;
+      }
       const url = isEditing
         ? `${API_URL}/events/${editingEvent.id}`
         : `${API_URL}/events`;
